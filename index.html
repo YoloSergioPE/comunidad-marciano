@@ -54,6 +54,7 @@
   <video id="video" autoplay playsinline></video>
   <canvas id="canvas" style="display:none;"></canvas>
 
+  <button onclick="switchCamera()">Cambiar cámara</button>
   <button onclick="takePhoto()">Tomar foto</button>
   <button id="sendBtn" onclick="send()" disabled>Enviar saludo</button>
 
@@ -66,21 +67,36 @@
   const statusText = document.getElementById("status");
 
   let imageData = null;
+  let currentFacing = "user";
+  let stream = null;
 
-  // Abrir cámara
-  navigator.mediaDevices.getUserMedia({ video: true })
-    .then(stream => {
+  function startCamera() {
+    if (stream) {
+      stream.getTracks().forEach(track => track.stop());
+    }
+
+    navigator.mediaDevices.getUserMedia({
+      video: { facingMode: currentFacing }
+    })
+    .then(s => {
+      stream = s;
       video.srcObject = stream;
     })
     .catch(() => {
       alert("No se pudo acceder a la cámara");
     });
+  }
+
+  function switchCamera() {
+    currentFacing = currentFacing === "user" ? "environment" : "user";
+    startCamera();
+  }
 
   function takePhoto() {
     canvas.width = video.videoWidth;
     canvas.height = video.videoHeight;
     canvas.getContext("2d").drawImage(video, 0, 0);
-    imageData = canvas.toDataURL("image/jpeg").split(",")[1];
+    imageData = canvas.toDataURL("image/jpeg", 0.9).split(",")[1];
     sendBtn.disabled = false;
     statusText.innerText = "Foto capturada ✔";
   }
@@ -89,32 +105,32 @@
     const name = document.getElementById("name").value || "Anonimo";
     const message = document.getElementById("message").value || "";
 
-    if (!imageData) {
-      alert("Toma una foto primero");
-      return;
-    }
-
     sendBtn.disabled = true;
     statusText.innerText = "Enviando saludo al Marciano...";
 
-    fetch("https://script.google.com/macros/s/AKfycbz7u-gdwo6xUSEnfvABHrfIHMP5Ko3VkSxs46e6JyT7tX9ZKDyecy8hvgCeDgnu3upXxw/exec", {
+    fetch("TU_URL_DE_APPS_SCRIPT", {
       method: "POST",
-      body: JSON.stringify({
-        name: name,
-        message: message,
-        image: imageData
-      })
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ name, message, image: imageData })
     })
-    .then(res => res.json())
-    .then(() => {
-      statusText.innerText = "¡Saludo enviado! 👽";
+    .then(r => r.json())
+    .then(res => {
+      if (res.success) {
+        statusText.innerText = "¡Saludo enviado!";
+      } else {
+        statusText.innerText = "Error: " + res.error;
+        sendBtn.disabled = false;
+      }
     })
-    .catch(() => {
-      statusText.innerText = "Error al enviar";
+    .catch(err => {
+      statusText.innerText = "Error de conexión";
       sendBtn.disabled = false;
     });
   }
+
+  startCamera();
 </script>
+
 
 </body>
 </html>
