@@ -76,14 +76,19 @@
     }
 
     navigator.mediaDevices.getUserMedia({
-      video: { facingMode: currentFacing }
+      video: {
+        facingMode: currentFacing,
+        width: { ideal: 1280 },
+        height: { ideal: 720 }
+      }
     })
     .then(s => {
       stream = s;
       video.srcObject = stream;
     })
-    .catch(() => {
+    .catch(err => {
       alert("No se pudo acceder a la cámara");
+      console.error(err);
     });
   }
 
@@ -93,30 +98,47 @@
   }
 
   function takePhoto() {
+    if (!video.videoWidth) {
+      alert("La cámara aún no está lista");
+      return;
+    }
+
     canvas.width = video.videoWidth;
     canvas.height = video.videoHeight;
     canvas.getContext("2d").drawImage(video, 0, 0);
-    imageData = canvas.toDataURL("image/jpeg", 0.9).split(",")[1];
+
+    imageData = canvas
+      .toDataURL("image/jpeg", 0.9)
+      .split(",")[1];
+
     sendBtn.disabled = false;
     statusText.innerText = "Foto capturada ✔";
   }
 
   function send() {
+    if (!imageData) {
+      alert("Debes tomar una foto primero");
+      return;
+    }
+
     const name = document.getElementById("name").value || "Anonimo";
     const message = document.getElementById("message").value || "";
 
     sendBtn.disabled = true;
     statusText.innerText = "Enviando saludo al Marciano...";
 
-    fetch("TU_URL_DE_APPS_SCRIPT", {
+    fetch("https://script.google.com/macros/s/AKfycbxPENiUNxxB8u41zia1nAOoPSbsj9ovj_8yRY5qoln4IA_wVljAea8yiqJemnZoiq7X5Q/exec", {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ name, message, image: imageData })
+      body: JSON.stringify({
+        name: name,
+        message: message,
+        image: imageData
+      })
     })
     .then(r => r.json())
     .then(res => {
       if (res.success) {
-        statusText.innerText = "¡Saludo enviado!";
+        statusText.innerText = "¡Saludo enviado con éxito! 👽";
       } else {
         statusText.innerText = "Error: " + res.error;
         sendBtn.disabled = false;
@@ -124,6 +146,7 @@
     })
     .catch(err => {
       statusText.innerText = "Error de conexión";
+      console.error(err);
       sendBtn.disabled = false;
     });
   }
@@ -131,6 +154,6 @@
   startCamera();
 </script>
 
-
 </body>
 </html>
+
