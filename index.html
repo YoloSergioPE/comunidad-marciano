@@ -6,59 +6,140 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
   <style>
+    * {
+      box-sizing: border-box;
+    }
+
     body {
-      font-family: Arial, sans-serif;
-      background: #0b0b0b;
+      margin: 0;
+      min-height: 100vh;
+      font-family: 'Segoe UI', Arial, sans-serif;
+      background: 
+        linear-gradient(rgba(0,0,0,0.65), rgba(0,0,0,0.85)),
+        url("assets/fondo.jpg") center / cover no-repeat fixed;
+      display: flex;
+      align-items: center;
+      justify-content: center;
       color: #fff;
-      text-align: center;
       padding: 20px;
     }
 
-    video, canvas {
+    .card {
       width: 100%;
-      max-width: 320px;
-      border-radius: 10px;
-      margin: 10px 0;
+      max-width: 420px;
+      background: rgba(15, 15, 20, 0.85);
+      backdrop-filter: blur(10px);
+      border-radius: 18px;
+      padding: 24px 20px 26px;
+      box-shadow: 0 20px 40px rgba(0,0,0,0.6);
+      text-align: center;
     }
 
-    input, textarea, button {
+    .logo {
+      width: 90px;
+      margin: 0 auto 10px;
+    }
+
+    h1 {
+      font-size: 1.6rem;
+      margin: 6px 0 4px;
+      letter-spacing: 0.5px;
+    }
+
+    p.subtitle {
+      font-size: 0.95rem;
+      color: #cfd3ff;
+      margin-bottom: 18px;
+    }
+
+    input, textarea {
       width: 100%;
-      max-width: 320px;
-      margin: 6px auto;
-      padding: 10px;
-      border-radius: 6px;
+      border-radius: 10px;
       border: none;
-      display: block;
+      padding: 12px 14px;
+      margin-bottom: 10px;
+      font-size: 0.95rem;
+      background: rgba(255,255,255,0.95);
+    }
+
+    textarea {
+      resize: none;
+      min-height: 70px;
+    }
+
+    video {
+      width: 100%;
+      border-radius: 14px;
+      margin: 12px 0;
+      background: #000;
     }
 
     button {
-      background: #1f8bff;
-      color: #fff;
-      font-weight: bold;
+      width: 100%;
+      padding: 13px;
+      border-radius: 12px;
+      border: none;
+      font-size: 1rem;
+      font-weight: 600;
       cursor: pointer;
+      margin-top: 8px;
+      background: linear-gradient(135deg, #1f8bff, #5f9dff);
+      color: #fff;
+      box-shadow: 0 8px 18px rgba(31,139,255,0.35);
+      transition: transform 0.15s ease, box-shadow 0.15s ease;
+    }
+
+    button:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 10px 22px rgba(31,139,255,0.45);
     }
 
     button:disabled {
       background: #555;
+      box-shadow: none;
+      cursor: not-allowed;
+    }
+
+    .secondary {
+      background: linear-gradient(135deg, #2b2b38, #3a3a4f);
+      box-shadow: 0 6px 14px rgba(0,0,0,0.4);
+    }
+
+    #status {
+      margin-top: 12px;
+      font-size: 0.9rem;
+      min-height: 18px;
+      color: #aee0ff;
+    }
+
+    @media (max-height: 700px) {
+      body {
+        align-items: flex-start;
+      }
     }
   </style>
 </head>
 <body>
 
-  <h2>📸 Saluda al Marciano</h2>
-  <p>Déjale tu foto y mensaje</p>
+  <div class="card">
 
-  <input type="text" id="name" placeholder="Tu nombre" />
-  <textarea id="message" placeholder="Tu mensaje"></textarea>
+    <img src="assets/logo.png" alt="El Marciano" class="logo" />
 
-  <video id="video" autoplay playsinline></video>
-  <canvas id="canvas" style="display:none;"></canvas>
+    <h1>Saluda al Marciano</h1>
+    <p class="subtitle">Déjale tu foto y mensaje a la comunidad</p>
 
-  <button onclick="switchCamera()">Cambiar cámara</button>
-  <button onclick="takePhoto()">Tomar foto</button>
-  <button id="sendBtn" onclick="send()" disabled>Enviar saludo</button>
+    <input type="text" id="name" placeholder="Tu nombre o nickname" />
+    <textarea id="message" placeholder="Tu mensaje para El Marciano"></textarea>
 
-  <p id="status"></p>
+    <video id="video" autoplay playsinline></video>
+    <canvas id="canvas" style="display:none;"></canvas>
+
+    <button class="secondary" onclick="switchCamera()">Cambiar cámara</button>
+    <button onclick="takePhoto()">Tomar foto</button>
+    <button id="sendBtn" onclick="send()" disabled>Enviar saludo</button>
+
+    <div id="status"></div>
+  </div>
 
 <script>
   const video = document.getElementById("video");
@@ -98,28 +179,19 @@
   }
 
   function takePhoto() {
-    if (!video.videoWidth) {
-      alert("La cámara aún no está lista");
-      return;
-    }
+    if (!video.videoWidth) return;
 
     canvas.width = video.videoWidth;
     canvas.height = video.videoHeight;
     canvas.getContext("2d").drawImage(video, 0, 0);
 
-    imageData = canvas
-      .toDataURL("image/jpeg", 0.9)
-      .split(",")[1];
-
+    imageData = canvas.toDataURL("image/jpeg", 0.9).split(",")[1];
     sendBtn.disabled = false;
     statusText.innerText = "Foto capturada ✔";
   }
 
   function send() {
-    if (!imageData) {
-      alert("Debes tomar una foto primero");
-      return;
-    }
+    if (!imageData) return;
 
     const name = document.getElementById("name").value || "Anonimo";
     const message = document.getElementById("message").value || "";
@@ -129,25 +201,15 @@
 
     fetch("https://script.google.com/macros/s/AKfycbw-v4gzxh5WKFgrHtQqEJWoSE9g6Q_Xxmn5LLqj7YyailzPWju03TayhpgvdPhBEzMjeQ/exec", {
       method: "POST",
-      body: JSON.stringify({
-        name: name,
-        message: message,
-        image: imageData
-      })
+      body: JSON.stringify({ name, message, image: imageData })
     })
-    .then(r => r.json())
-    .then(res => {
-      if (res.success) {
-        statusText.innerText = "¡Saludo enviado con éxito! 👽";
-      } else {
-        statusText.innerText = "Error: " + res.error;
-        sendBtn.disabled = false;
-      }
+    .then(() => {
+      statusText.innerText = "¡Saludo enviado con éxito! 👽";
     })
     .catch(err => {
-      statusText.innerText = "Error de conexión";
-      console.error(err);
+      statusText.innerText = "Error al enviar";
       sendBtn.disabled = false;
+      console.error(err);
     });
   }
 
