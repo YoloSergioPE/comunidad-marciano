@@ -6,15 +6,13 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
   <style>
-    * {
-      box-sizing: border-box;
-    }
+    * { box-sizing: border-box; }
 
     body {
       margin: 0;
       min-height: 100vh;
       font-family: 'Segoe UI', Arial, sans-serif;
-      background: 
+      background:
         linear-gradient(rgba(0,0,0,0.65), rgba(0,0,0,0.85)),
         url("assets/fondo.jpg") center / cover no-repeat fixed;
       display: flex;
@@ -27,27 +25,34 @@
     .card {
       width: 100%;
       max-width: 420px;
-      background: rgba(15, 15, 20, 0.85);
-      backdrop-filter: blur(10px);
+      background: linear-gradient(
+        180deg,
+        rgba(255,255,255,0.08),
+        rgba(255,255,255,0.02)
+      );
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
       border-radius: 18px;
       padding: 24px 20px 26px;
-      box-shadow: 0 20px 40px rgba(0,0,0,0.6);
+      border: 1px solid rgba(255,255,255,0.12);
+      box-shadow:
+        0 20px 40px rgba(0,0,0,0.55),
+        inset 0 0 0 1px rgba(255,255,255,0.03);
       text-align: center;
-      opaccity: 10%;
     }
 
     .logo {
       width: 90px;
       margin: 0 auto 10px;
+      border-radius: 18px;
     }
 
     h1 {
       font-size: 1.6rem;
       margin: 6px 0 4px;
-      letter-spacing: 0.5px;
     }
 
-    p.subtitle {
+    .subtitle {
       font-size: 0.95rem;
       color: #cfd3ff;
       margin-bottom: 18px;
@@ -87,23 +92,15 @@
       background: linear-gradient(135deg, #1f8bff, #5f9dff);
       color: #fff;
       box-shadow: 0 8px 18px rgba(31,139,255,0.35);
-      transition: transform 0.15s ease, box-shadow 0.15s ease;
-    }
-
-    button:hover {
-      transform: translateY(-1px);
-      box-shadow: 0 10px 22px rgba(31,139,255,0.45);
     }
 
     button:disabled {
       background: #555;
       box-shadow: none;
-      cursor: not-allowed;
     }
 
     .secondary {
       background: linear-gradient(135deg, #2b2b38, #3a3a4f);
-      box-shadow: 0 6px 14px rgba(0,0,0,0.4);
     }
 
     #status {
@@ -113,23 +110,54 @@
       color: #aee0ff;
     }
 
-    @media (max-height: 700px) {
-      body {
-        align-items: flex-start;
-      }
+    /* LOADING SCREEN */
+    #loadingScreen {
+      position: fixed;
+      inset: 0;
+      background: linear-gradient(
+        rgba(0,0,0,0.85),
+        rgba(0,0,0,0.95)
+      );
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 999;
+      text-align: center;
+      padding: 20px;
+    }
+
+    .loading-box h2 {
+      font-size: 1.4rem;
+      margin-bottom: 10px;
+    }
+
+    .loading-box p {
+      font-size: 0.95rem;
+      color: #cfd3ff;
+    }
+
+    .whatsapp-btn {
+      display: inline-block;
+      margin-top: 20px;
+      padding: 12px 20px;
+      border-radius: 12px;
+      text-decoration: none;
+      font-weight: 600;
+      color: #fff;
+      background: linear-gradient(135deg, #25D366, #1ebe5d);
+      box-shadow: 0 10px 20px rgba(37,211,102,0.35);
     }
   </style>
 </head>
+
 <body>
 
-  <div class="card">
-
-    <img src="assets/logo.png" alt="El Marciano" class="logo" />
-
+  <div class="card" id="mainCard">
+    <img src="assets/logo.png" class="logo" alt="El Marciano">
     <h1>Saluda al Marciano</h1>
     <p class="subtitle">Déjale tu foto y mensaje a la comunidad</p>
 
-    <input type="text" id="name" placeholder="Tu nombre o nickname" />
+    <input id="name" placeholder="Tu nombre o nickname">
     <textarea id="message" placeholder="Tu mensaje para El Marciano"></textarea>
 
     <video id="video" autoplay playsinline></video>
@@ -142,35 +170,34 @@
     <div id="status"></div>
   </div>
 
+  <div id="loadingScreen">
+    <div class="loading-box">
+      <h2 id="loadingText">Enviando tu saludo marcianin 👽</h2>
+      <p>Transmitiendo tu mensaje intergaláctico...</p>
+    </div>
+  </div>
+
 <script>
   const video = document.getElementById("video");
   const canvas = document.getElementById("canvas");
   const sendBtn = document.getElementById("sendBtn");
   const statusText = document.getElementById("status");
+  const loadingScreen = document.getElementById("loadingScreen");
+  const loadingText = document.getElementById("loadingText");
+  const mainCard = document.getElementById("mainCard");
 
   let imageData = null;
   let currentFacing = "user";
   let stream = null;
 
   function startCamera() {
-    if (stream) {
-      stream.getTracks().forEach(track => track.stop());
-    }
+    if (stream) stream.getTracks().forEach(t => t.stop());
 
     navigator.mediaDevices.getUserMedia({
-      video: {
-        facingMode: currentFacing,
-        width: { ideal: 1280 },
-        height: { ideal: 720 }
-      }
-    })
-    .then(s => {
+      video: { facingMode: currentFacing, width:{ideal:1280}, height:{ideal:720} }
+    }).then(s => {
       stream = s;
       video.srcObject = stream;
-    })
-    .catch(err => {
-      alert("No se pudo acceder a la cámara");
-      console.error(err);
     });
   }
 
@@ -180,12 +207,9 @@
   }
 
   function takePhoto() {
-    if (!video.videoWidth) return;
-
     canvas.width = video.videoWidth;
     canvas.height = video.videoHeight;
     canvas.getContext("2d").drawImage(video, 0, 0);
-
     imageData = canvas.toDataURL("image/jpeg", 0.9).split(",")[1];
     sendBtn.disabled = false;
     statusText.innerText = "Foto capturada ✔";
@@ -194,23 +218,26 @@
   function send() {
     if (!imageData) return;
 
-    const name = document.getElementById("name").value || "Anonimo";
-    const message = document.getElementById("message").value || "";
-
-    sendBtn.disabled = true;
-    statusText.innerText = "Enviando saludo al Marciano...";
+    mainCard.style.display = "none";
+    loadingScreen.style.display = "flex";
 
     fetch("https://script.google.com/macros/s/AKfycbw-v4gzxh5WKFgrHtQqEJWoSE9g6Q_Xxmn5LLqj7YyailzPWju03TayhpgvdPhBEzMjeQ/exec", {
       method: "POST",
-      body: JSON.stringify({ name, message, image: imageData })
-    })
-    .then(() => {
-      statusText.innerText = "¡Saludo enviado con éxito! 👽";
-    })
-    .catch(err => {
-      statusText.innerText = "Error al enviar";
-      sendBtn.disabled = false;
-      console.error(err);
+      body: JSON.stringify({
+        name: document.getElementById("name").value || "Anonimo",
+        message: document.getElementById("message").value || "",
+        image: imageData
+      })
+    }).then(() => {
+      loadingText.innerHTML = `
+        Tus saludos han sido enviados mi marcianin 👽<br><br>
+        No te olvides unirte a mi comunidad
+        <br>
+        <a class="whatsapp-btn" target="_blank"
+           href="https://chat.whatsapp.com/IviDOt7pRjbCywAfzSFe6d">
+           Unirme a la comunidad 🚀
+        </a>
+      `;
     });
   }
 
@@ -219,4 +246,5 @@
 
 </body>
 </html>
+
 
