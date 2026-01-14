@@ -73,7 +73,7 @@
       min-height: 70px;
     }
 
-    video {
+    video, img.preview {
       width: 100%;
       border-radius: 14px;
       margin: 12px 0;
@@ -97,6 +97,7 @@
     button:disabled {
       background: #555;
       box-shadow: none;
+      cursor: not-allowed;
     }
 
     .secondary {
@@ -110,14 +111,11 @@
       color: #aee0ff;
     }
 
-    /* LOADING SCREEN */
+    /* LOADING */
     #loadingScreen {
       position: fixed;
       inset: 0;
-      background: linear-gradient(
-        rgba(0,0,0,0.85),
-        rgba(0,0,0,0.95)
-      );
+      background: linear-gradient(rgba(0,0,0,0.85), rgba(0,0,0,0.95));
       display: none;
       align-items: center;
       justify-content: center;
@@ -131,11 +129,6 @@
       margin-bottom: 10px;
     }
 
-    .loading-box p {
-      font-size: 0.95rem;
-      color: #cfd3ff;
-    }
-
     .whatsapp-btn {
       display: inline-block;
       margin-top: 20px;
@@ -145,43 +138,52 @@
       font-weight: 600;
       color: #fff;
       background: linear-gradient(135deg, #25D366, #1ebe5d);
-      box-shadow: 0 10px 20px rgba(37,211,102,0.35);
     }
   </style>
 </head>
 
 <body>
 
-  <div class="card" id="mainCard">
-    <img src="assets/logo.png" class="logo" alt="El Marciano">
-    <h1>Saluda al Marciano</h1>
-    <p class="subtitle">Déjale tu foto y mensaje a la comunidad</p>
+<div class="card" id="mainCard">
+  <img src="assets/logo.png" class="logo" alt="El Marciano">
+  <h1>Saluda al Marciano</h1>
+  <p class="subtitle">Déjale tu foto y mensaje a la comunidad</p>
 
-    <input id="name" placeholder="Tu nombre / de donde nos vemos">
-    <textarea id="message" placeholder="Tu mensaje para El Marciano"></textarea>
+  <input id="name" placeholder="Tu nombre / de donde nos ves">
+  <textarea id="message" placeholder="Tu mensaje para El Marciano"></textarea>
 
-    <video id="video" autoplay playsinline></video>
-    <canvas id="canvas" style="display:none;"></canvas>
+  <video id="video" autoplay playsinline></video>
+  <img id="photoPreview" class="preview" style="display:none;" />
 
-    <button class="secondary" onclick="switchCamera()">Cambiar cámara</button>
-    <button onclick="takePhoto()">Tomar foto</button>
-    <button id="sendBtn" onclick="send()" disabled>Enviar saludo</button>
+  <canvas id="canvas" style="display:none;"></canvas>
 
-    <div id="status"></div>
+  <button class="secondary" onclick="switchCamera()" id="switchBtn">Cambiar cámara</button>
+  <button onclick="takePhoto()" id="takeBtn">Tomar foto</button>
+
+  <button onclick="retakePhoto()" id="retakeBtn" style="display:none;">Hacer nueva foto</button>
+  <button onclick="send()" id="sendBtn" style="display:none;">Enviar saludo</button>
+
+  <div id="status"></div>
+</div>
+
+<div id="loadingScreen">
+  <div class="loading-box">
+    <h2 id="loadingText">Enviando tu saludo marcianin 👽</h2>
+    <p>América Esports - 2026</p>
   </div>
-
-  <div id="loadingScreen">
-    <div class="loading-box">
-      <h2 id="loadingText">Enviando tu saludo marcianin 👽</h2>
-      <p> América Esports - 2026</p>
-    </div>
-  </div>
+</div>
 
 <script>
   const video = document.getElementById("video");
   const canvas = document.getElementById("canvas");
-  const sendBtn = document.getElementById("sendBtn");
+  const preview = document.getElementById("photoPreview");
   const statusText = document.getElementById("status");
+
+  const takeBtn = document.getElementById("takeBtn");
+  const retakeBtn = document.getElementById("retakeBtn");
+  const sendBtn = document.getElementById("sendBtn");
+  const switchBtn = document.getElementById("switchBtn");
+
   const loadingScreen = document.getElementById("loadingScreen");
   const loadingText = document.getElementById("loadingText");
   const mainCard = document.getElementById("mainCard");
@@ -210,14 +212,35 @@
     canvas.width = video.videoWidth;
     canvas.height = video.videoHeight;
     canvas.getContext("2d").drawImage(video, 0, 0);
+
     imageData = canvas.toDataURL("image/jpeg", 0.9).split(",")[1];
-    sendBtn.disabled = false;
-    statusText.innerText = "Foto capturada ✔";
+    preview.src = "data:image/jpeg;base64," + imageData;
+
+    video.style.display = "none";
+    preview.style.display = "block";
+
+    takeBtn.style.display = "none";
+    switchBtn.style.display = "none";
+    retakeBtn.style.display = "block";
+    sendBtn.style.display = "block";
+
+    statusText.innerText = "¿Te gusta la foto?";
+  }
+
+  function retakePhoto() {
+    imageData = null;
+    preview.style.display = "none";
+    video.style.display = "block";
+
+    takeBtn.style.display = "block";
+    switchBtn.style.display = "block";
+    retakeBtn.style.display = "none";
+    sendBtn.style.display = "none";
+
+    statusText.innerText = "";
   }
 
   function send() {
-    if (!imageData) return;
-
     mainCard.style.display = "none";
     loadingScreen.style.display = "flex";
 
@@ -231,8 +254,6 @@
     }).then(() => {
       loadingText.innerHTML = `
         Tus saludos han sido enviados mi marcianin 👽<br><br>
-        No te olvides unirte a mi comunidad
-        <br>
         <a class="whatsapp-btn" target="_blank"
            href="https://chat.whatsapp.com/IviDOt7pRjbCywAfzSFe6d">
            Unirme a la comunidad 🚀
@@ -246,5 +267,3 @@
 
 </body>
 </html>
-
-
