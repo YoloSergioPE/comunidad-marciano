@@ -156,9 +156,17 @@
   <img id="photoPreview" class="preview" style="display:none;" />
 
   <canvas id="canvas" style="display:none;"></canvas>
-
+  <input 
+    type="file" 
+    id="galleryInput" 
+    accept="image/*"
+    style="display:none;"
+  >
   <button class="secondary" onclick="switchCamera()" id="switchBtn">Cambiar cámara</button>
   <button onclick="takePhoto()" id="takeBtn">Tomar foto</button>
+  <button class="secondary" onclick="openGallery()" id="galleryBtn">
+    Subir desde galería
+  </button>
 
   <button onclick="retakePhoto()" id="retakeBtn" style="display:none;">Hacer nueva foto</button>
   <button onclick="send()" id="sendBtn" style="display:none;">Enviar saludo</button>
@@ -229,16 +237,21 @@
 
   function retakePhoto() {
     imageData = null;
+
     preview.style.display = "none";
     video.style.display = "block";
 
     takeBtn.style.display = "block";
     switchBtn.style.display = "block";
+    galleryBtn.style.display = "block";
+
     retakeBtn.style.display = "none";
     sendBtn.style.display = "none";
 
+    galleryInput.value = "";
     statusText.innerText = "";
   }
+
 
   function send() {
     mainCard.style.display = "none";
@@ -262,8 +275,48 @@
     });
   }
 
+  const galleryInput = document.getElementById("galleryInput");
+  const galleryBtn = document.getElementById("galleryBtn");
+
+  function openGallery() {
+    galleryInput.click();
+  }
+
+  galleryInput.addEventListener("change", () => {
+    const file = galleryInput.files[0];
+    if (!file) return;
+
+    if (!file.type.startsWith("image/")) {
+      alert("Solo se permiten imágenes");
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = () => {
+      const base64 = reader.result.split(",")[1];
+      imageData = base64;
+
+      preview.src = reader.result;
+
+      video.style.display = "none";
+      preview.style.display = "block";
+
+      takeBtn.style.display = "none";
+      switchBtn.style.display = "none";
+      galleryBtn.style.display = "none";
+
+      retakeBtn.style.display = "block";
+      sendBtn.style.display = "block";
+
+      statusText.innerText = "Imagen cargada desde tu galería 📸";
+    };
+
+    reader.readAsDataURL(file);
+  });
+
   startCamera();
 </script>
 
 </body>
 </html>
+
