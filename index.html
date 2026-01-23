@@ -415,6 +415,10 @@ BLOQUE DE FOTO
     }
 
     if (mode === "audio") {
+      audioBlob = null;
+      sendAudioBtn.disabled = false;
+      sendAudioBtn.style.display = "none";
+
       document.getElementById("audioContent").style.display = "block";
       startAudio(); // permisos SOLO aquí
     }
@@ -446,6 +450,7 @@ BLOQUE DE FOTO
 
       audioPreview.src = audioURL;
       audioPreview.style.display = "block";
+      sendAudioBtn.disabled = false;
       document.getElementById("sendAudioBtn").style.display = "block";
     });
 
@@ -488,6 +493,8 @@ BLOQUE DE FOTO
 
         audioPreview.src = audioURL;
         audioPreview.style.display = "block";
+        sendAudioBtn.disabled = false;
+
         document.getElementById("sendAudioBtn").style.display = "block";
       };
     }
@@ -560,6 +567,8 @@ BLOQUE DE FOTO
       imageData = null;
       audioBlob = null;
       sendBtn.disabled = false;
+      sendAudioBtn.disabled = false;
+      sendAudioBtn.style.display = "none";
 
 
       document.getElementById("name").value = "";
@@ -574,4 +583,3 @@ BLOQUE DE FOTO
 
 </body>
 </html>
-
