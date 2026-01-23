@@ -246,11 +246,6 @@ BLOQUE DE FOTO
     <h2 id="loadingText"></h2>
 
     <div id="loadingActions" style="display:none;">
-      <a class="whatsapp-btn" target="_blank"
-         href="https://chat.whatsapp.com/IviDOt7pRjbCywAfzSFe6d">
-         Unirme a la comunidad 🚀
-      </a>
-
       <button class="secondary" onclick="resetApp()">
         Volver al inicio
       </button>
@@ -312,8 +307,11 @@ BLOQUE DE FOTO
     switchBtn.style.display = "none";
     retakeBtn.style.display = "block";
     sendBtn.style.display = "block";
+    sendBtn.disabled = false;
 
-    statusText.innerText = "¿Te gusta la foto?";
+
+
+    statusText.innerText = "¿Te gusta la foto?";    
   }
 
   function retakePhoto() {
@@ -331,6 +329,8 @@ BLOQUE DE FOTO
 
     galleryInput.value = "";
     statusText.innerText = "";
+    sendBtn.disabled = false;
+
   }
 
 
@@ -396,6 +396,7 @@ BLOQUE DE FOTO
 
       retakeBtn.style.display = "block";
       sendBtn.style.display = "block";
+      sendBtn.disabled = false; // ✅ FIX
 
       statusText.innerText = "Imagen cargada desde tu galería 📸";
     };
@@ -558,6 +559,8 @@ BLOQUE DE FOTO
 
       imageData = null;
       audioBlob = null;
+      sendBtn.disabled = false;
+
 
       document.getElementById("name").value = "";
       document.getElementById("message").value = "";
@@ -571,3 +574,4 @@ BLOQUE DE FOTO
 
 </body>
 </html>
+
