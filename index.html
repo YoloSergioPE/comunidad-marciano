@@ -217,6 +217,14 @@ BLOQUE DE FOTO
     <div id="audioContent" style="display:none;">
           <input id="audioName" placeholder="Tu nombre / de donde nos ves">
 
+          <input 
+            type="file"
+            id="iosAudioInput"
+            accept="audio/*"
+            capture
+            style="display:none;"
+          >
+
           <button onclick="startRecording()">🎙️ Grabar audio</button>
           <button onclick="stopRecording()" disabled id="stopBtn">⏹️ Detener</button>
 
@@ -237,16 +245,19 @@ BLOQUE DE FOTO
   <div class="loading-box">
     <h2 id="loadingText"></h2>
 
-    <a class="whatsapp-btn" target="_blank"
-       href="https://chat.whatsapp.com/IviDOt7pRjbCywAfzSFe6d">
-       Unirme a la comunidad 🚀
-    </a>
+    <div id="loadingActions" style="display:none;">
+      <a class="whatsapp-btn" target="_blank"
+         href="https://chat.whatsapp.com/IviDOt7pRjbCywAfzSFe6d">
+         Unirme a la comunidad 🚀
+      </a>
 
-    <button class="secondary" onclick="resetApp()">
-      Volver al inicio
-    </button>
+      <button class="secondary" onclick="resetApp()">
+        Volver al inicio
+      </button>
+    </div>
   </div>
 </div>
+
 
 <script>
   const video = document.getElementById("video");
@@ -262,6 +273,9 @@ BLOQUE DE FOTO
   const loadingScreen = document.getElementById("loadingScreen");
   const loadingText = document.getElementById("loadingText");
   const mainCard = document.getElementById("mainCard");
+  const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+
+
 
   let imageData = null;
   let currentFacing = "user";
@@ -323,6 +337,9 @@ BLOQUE DE FOTO
   function send() {
     mainCard.style.display = "none";
     loadingScreen.style.display = "flex";
+    
+    loadingText.innerText = "Tu saludo se está enviando, Marcianin 👽";
+    document.getElementById("loadingActions").style.display = "none";
 
     sendBtn && (sendBtn.disabled = true);
     document.getElementById("sendAudioBtn")?.setAttribute("disabled", true);
@@ -343,6 +360,7 @@ BLOQUE DE FOTO
            Unirme a la comunidad 🚀
         </a>
       `;
+      document.getElementById("loadingActions").style.display = "block";
     });
   }
 
@@ -414,7 +432,28 @@ BLOQUE DE FOTO
         });
     }
 
+    const iosAudioInput = document.getElementById("iosAudioInput");
+
+    iosAudioInput.addEventListener("change", e => {
+      const file = e.target.files[0];
+      if (!file) return;
+
+      audioBlob = file;
+
+      const audioURL = URL.createObjectURL(file);
+      const audioPreview = document.getElementById("audioPreview");
+
+      audioPreview.src = audioURL;
+      audioPreview.style.display = "block";
+      document.getElementById("sendAudioBtn").style.display = "block";
+    });
+
     function startRecording() {
+      if (isIOS) {
+        iosAudioInput.click();
+        return;
+      }
+
       if (!mediaRecorder) return;
 
       audioChunks = [];
@@ -423,6 +462,7 @@ BLOQUE DE FOTO
       document.getElementById("recordingIndicator").style.display = "flex";
       document.getElementById("stopBtn").disabled = false;
     }
+
 
     function stopRecording() {
       mediaRecorder.stop();
@@ -454,7 +494,10 @@ BLOQUE DE FOTO
     function sendAudio() {
       mainCard.style.display = "none";
       loadingScreen.style.display = "flex";
-      loadingText.innerText = "Enviando tu audio marcianin 🎙️";
+      
+      loadingText.innerText = "Tu saludo se está enviando, Marcianin 👽";
+      document.getElementById("loadingActions").style.display = "none";
+
 
       const reader = new FileReader();
 
@@ -472,7 +515,13 @@ BLOQUE DE FOTO
             audio: base64Audio
           })
         }).then(() => {
-          loadingText.innerText = "Tu audio fue enviado mi marcianin 👽";
+          loadingText.innerText = `
+        Tus saludos han sido enviados mi marcianin 👽<br><br>
+        <a class="whatsapp-btn" target="_blank"
+           href="https://chat.whatsapp.com/IviDOt7pRjbCywAfzSFe6d">
+           Unirme a la comunidad 🚀
+        </a>`;
+        document.getElementById("loadingActions").style.display = "block";
         });
       };
 
@@ -482,6 +531,7 @@ BLOQUE DE FOTO
     function resetApp() {
       loadingScreen.style.display = "none";
       mainCard.style.display = "block";
+      iosAudioInput.value = "";
 
       if (stream) {
         stream.getTracks().forEach(t => t.stop());
