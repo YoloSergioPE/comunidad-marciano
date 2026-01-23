@@ -515,13 +515,14 @@ BLOQUE DE FOTO
             audio: base64Audio
           })
         }).then(() => {
-          loadingText.innerText = `
-        Tus saludos han sido enviados mi marcianin 👽<br><br>
-        <a class="whatsapp-btn" target="_blank"
-           href="https://chat.whatsapp.com/IviDOt7pRjbCywAfzSFe6d">
-           Unirme a la comunidad 🚀
-        </a>`;
-        document.getElementById("loadingActions").style.display = "block";
+          loadingText.innerHTML = `
+            Tus saludos han sido enviados mi marcianin 👽<br><br>
+            <a class="whatsapp-btn" target="_blank"
+              href="https://chat.whatsapp.com/IviDOt7pRjbCywAfzSFe6d">
+              Unirme a la comunidad 🚀
+            </a>
+          `;
+          document.getElementById("loadingActions").style.display = "block";
         });
       };
 
