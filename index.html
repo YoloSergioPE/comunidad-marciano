@@ -144,41 +144,70 @@
 
 <body>
 
-<div class="card" id="mainCard">
-  <img src="assets/logo.png" class="logo" alt="El Marciano">
-  <h1>Saluda al Marciano</h1>
-  <p class="subtitle">Déjale tu foto y mensaje a la comunidad</p>
-
-  <input id="name" placeholder="Tu nombre / de donde nos ves">
-  <textarea id="message" placeholder="Tu mensaje para El Marciano"></textarea>
-
-  <video id="video" autoplay playsinline></video>
-  <img id="photoPreview" class="preview" style="display:none;" />
-
-  <canvas id="canvas" style="display:none;"></canvas>
-  <input 
-    type="file" 
-    id="galleryInput" 
-    accept="image/*"
-    style="display:none;"
-  >
-  <button class="secondary" onclick="switchCamera()" id="switchBtn">Cambiar cámara</button>
-  <button onclick="takePhoto()" id="takeBtn">Tomar foto</button>
-  <button class="secondary" onclick="openGallery()" id="galleryBtn">
-    Subir desde galería
-  </button>
-
-  <button onclick="retakePhoto()" id="retakeBtn" style="display:none;">Hacer nueva foto</button>
-  <button onclick="send()" id="sendBtn" style="display:none;">Enviar saludo</button>
-
-  <div id="status"></div>
+<div id="modeSelector">
+  <button onclick="selectMode('photo')">📸 Envía tu foto</button>
+  <button onclick="selectMode('audio')">🎙️ Envía tu audio</button>
 </div>
 
-<div id="loadingScreen">
-  <div class="loading-box">
-    <h2 id="loadingText">Enviando tu saludo marcianin 👽</h2>
-    <p>América Esports - 2026</p>
+<!-- 
+BLOQUE DE FOTO 
+-->
+<div id="photoMode" style="display:none;">
+  <div class="card" id="mainCard">
+    <img src="assets/logo.png" class="logo" alt="El Marciano">
+    <h1>Saluda al Marciano</h1>
+    <p class="subtitle">Déjale tu foto y mensaje a la comunidad</p>
+
+    <input id="name" placeholder="Tu nombre / de donde nos ves">
+    <textarea id="message" placeholder="Tu mensaje para El Marciano"></textarea>
+
+    <video id="video" autoplay playsinline></video>
+    <img id="photoPreview" class="preview" style="display:none;" />
+
+    <canvas id="canvas" style="display:none;"></canvas>
+    <input 
+      type="file" 
+      id="galleryInput" 
+      accept="image/*"
+      style="display:none;"
+    >
+    <button class="secondary" onclick="switchCamera()" id="switchBtn">Cambiar cámara</button>
+    <button onclick="takePhoto()" id="takeBtn">Tomar foto</button>
+    <button class="secondary" onclick="openGallery()" id="galleryBtn">
+      Subir desde galería
+    </button>
+
+    <button onclick="retakePhoto()" id="retakeBtn" style="display:none;">Hacer nueva foto</button>
+    <button onclick="send()" id="sendBtn" style="display:none;">Enviar saludo</button>
+
+    <div id="status"></div>
   </div>
+
+  <div id="loadingScreen">
+    <div class="loading-box">
+      <h2 id="loadingText">Enviando tu saludo marcianin 👽</h2>
+      <p>América Esports - 2026</p>
+    </div>
+  </div>
+</div>
+
+<!-- 
+BLOQUE DE AUDIO 
+-->
+
+<div id="audioMode" style="display:none;">
+    <input id="audioName" placeholder="Tu nombre / de donde nos ves">
+
+    <button onclick="startRecording()">🎙️ Grabar audio</button>
+    <button onclick="stopRecording()" disabled id="stopBtn">⏹️ Detener</button>
+
+    <audio id="audioPreview" controls style="display:none;"></audio>
+
+    <button onclick="sendAudio()" id="sendAudioBtn" style="display:none;">
+      Enviar audio
+    </button>
+
+    <div id="audioStatus"></div>
 </div>
 
 <script>
@@ -257,9 +286,10 @@
     mainCard.style.display = "none";
     loadingScreen.style.display = "flex";
 
-    fetch("https://script.google.com/macros/s/AKfycbz_cIsFw8UcOUcU8GmHBL_KFJpnJbHhPgAN1AqiCwHY681LztII4kUwJKlCoiJhk94YFQ/exec", {
+    fetch("https://script.google.com/macros/s/AKfycbyNUa-1GMh2ac8A_I0r7tJoKllFFbSG1Podw5Hg223rmfkgrCu0msaigm0fwIIoXrPpGw/exec", {
       method: "POST",
       body: JSON.stringify({
+        type: "photo",
         name: document.getElementById("name").value || "Anonimo",
         message: document.getElementById("message").value || "",
         image: imageData
@@ -315,8 +345,83 @@
   });
 
   startCamera();
+
+  function selectMode(mode) {
+      document.getElementById("modeSelector").style.display = "none";
+      document.getElementById("photoMode").style.display = "none";
+      document.getElementById("audioMode").style.display = "none";
+
+    if (mode === "photo") {
+      document.getElementById("photoMode").style.display = "block";
+      startCamera();
+    }
+
+    if (mode === "audio") {
+      if (stream) {
+        stream.getTracks().forEach(t => t.stop());
+        stream = null;
+      }
+      document.getElementById("audioMode").style.display = "block";
+      startAudio();
+    }
+  }
+
+    let mediaRecorder;
+    let audioChunks = [];
+    let audioBlob = null;
+
+    function startAudio() {
+      navigator.mediaDevices.getUserMedia({ audio: true })
+        .then(stream => {
+          mediaRecorder = new MediaRecorder(stream);
+        });
+    }
+
+    function startRecording() {
+      audioChunks = [];
+      mediaRecorder.start();
+      document.getElementById("stopBtn").disabled = false;
+    }
+
+    function stopRecording() {
+      mediaRecorder.stop();
+      document.getElementById("stopBtn").disabled = true;
+
+      mediaRecorder.ondataavailable = e => {
+        audioChunks.push(e.data);
+      };
+
+      mediaRecorder.onstop = () => {
+        audioBlob = new Blob(audioChunks, { type: "audio/webm" });
+
+        const audioURL = URL.createObjectURL(audioBlob);
+        const audioPreview = document.getElementById("audioPreview");
+
+        audioPreview.src = audioURL;
+        audioPreview.style.display = "block";
+        document.getElementById("sendAudioBtn").style.display = "block";
+      };
+    }
+
+    function sendAudio() {
+      const reader = new FileReader();
+
+      reader.onload = () => {
+        const base64Audio = reader.result.split(",")[1];
+
+        fetch("https://script.google.com/macros/s/AKfycbyNUa-1GMh2ac8A_I0r7tJoKllFFbSG1Podw5Hg223rmfkgrCu0msaigm0fwIIoXrPpGw/exec", {
+          method: "POST",
+          body: JSON.stringify({
+            type: "audio",
+            name: document.getElementById("audioName").value || "Anonimo",
+            audio: base64Audio
+          })
+        });
+      };
+
+      reader.readAsDataURL(audioBlob);
+    }
 </script>
 
 </body>
 </html>
-
