@@ -361,6 +361,10 @@ BLOQUE DE FOTO
   const team1Label = document.getElementById("team1Label");
   const team2Label = document.getElementById("team2Label");
 
+  const scoreText = document.getElementById("scoreText");
+  const team1Logo = document.getElementById("team1Logo");
+  const team2Logo = document.getElementById("team2Logo");
+
   document.getElementById("sendPredBtn").disabled = true;
   document.getElementById("sendPredBtn").innerText = "Cargando partida...";
 
@@ -681,9 +685,6 @@ BLOQUE DE FOTO
 
     document.getElementById("predName").addEventListener("input", updatePredictionButton);
     document.getElementById("predPhone").addEventListener("input", updatePredictionButton);
-    document.querySelectorAll('input[name="winner"]').forEach(r=>{
-      r.addEventListener("change", updatePredictionButton);
-    });
 
 
     function updatePredictionButton(){
@@ -711,16 +712,18 @@ BLOQUE DE FOTO
 
       const name = document.getElementById("predName").value;
       const phone = document.getElementById("predPhone").value;
-      const winner = document.querySelector('input[name="winner"]:checked');
 
-      if(!winner){
+      if(!pickedTeam){
         alert("Selecciona un equipo");
         return;
       }
+
       if(!name || !phone || !predictionImage){
         alert("Completa todos los campos");
         return;
       }
+
+      document.getElementById("sendPredBtn").disabled = true;
 
       mainCard.style.display = "none";
       loadingScreen.style.display = "flex";
@@ -737,16 +740,22 @@ BLOQUE DE FOTO
           rival: pickedTeam === "team1" ? team2Label.innerText : team1Label.innerText,
           image:predictionImage
         })
-      }).then(()=>{
-          loadingText.innerHTML = `
-            Tu predicción ha sido enviada mi marcianin 👽<br><br>
-            <a class="whatsapp-btn" target="_blank"
-              href="https://chat.whatsapp.com/IviDOt7pRjbCywAfzSFe6d">
-              Unirme a la comunidad 🚀
-            </a>
-          `;
-          document.getElementById("loadingActions").style.display = "block";
-        });
+      }).then(r => r.json())
+      .then(r=>{
+        if(!r.success) throw new Error(r.error);
+
+        loadingText.innerHTML = `Tu predicción ha sido enviada mi marcianin 👽<br><br>
+        <a class="whatsapp-btn" target="_blank"
+        href="https://chat.whatsapp.com/IviDOt7pRjbCywAfzSFe6d">
+        Unirme a la comunidad 🚀</a>`;
+
+        document.getElementById("loadingActions").style.display = "block";
+      })
+      .catch(()=>{
+        loadingText.innerHTML = `⚠️ No pudimos registrar tu predicción.
+        Revisa tu conexión e intenta nuevamente.`;
+        document.getElementById("loadingActions").style.display = "block";
+      });
     }
 
 
@@ -786,8 +795,10 @@ BLOQUE DE FOTO
 
       predictionImage = null;
       document.getElementById("predImage").value = "";
-      document.querySelectorAll('input[name="winner"]').forEach(r=>r.checked=false);
       document.getElementById("sendPredBtn").disabled = true;
+      document.getElementById("team1Card").classList.remove("selected");
+      document.getElementById("team2Card").classList.remove("selected");
+      pickedTeam = null;
       document.getElementById("predictionContent").style.display = "none";
       document.querySelector("h1").innerText = "Saluda al Marciano";
 
@@ -831,6 +842,10 @@ BLOQUE DE FOTO
     let predictionsOpen = false;
 
     async function updateMatchState() {
+
+      team1Logo.onerror = () => team1Logo.src = "assets/default_team.png";
+      team2Logo.onerror = () => team2Logo.src = "assets/default_team.png";
+
       try {
         const res = await fetch(API_URL + "?t=" + Date.now());
 
@@ -883,9 +898,14 @@ BLOQUE DE FOTO
       document.getElementById("predImage").value = "";
       predictionImage = null;
 
-      document.querySelectorAll('input[name="winner"]').forEach(r=>r.checked=false);
+      pickedTeam = null;
+
+      document.getElementById("team1Card").classList.remove("selected");
+      document.getElementById("team2Card").classList.remove("selected");
+
       document.getElementById("sendPredBtn").disabled = true;
     }
+
 
     updateMatchState();
     setInterval(updateMatchState, 45000 + Math.random()*15000);
