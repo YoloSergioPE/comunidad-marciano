@@ -313,7 +313,6 @@ BLOQUE DE FOTO
   let predictionImage = null;
 
 
-
   function startCamera() {
     if (stream) stream.getTracks().forEach(t => t.stop());
 
@@ -382,8 +381,9 @@ BLOQUE DE FOTO
     sendBtn && (sendBtn.disabled = true);
     document.getElementById("sendAudioBtn")?.setAttribute("disabled", true);
 
-    fetch("https://script.google.com/macros/s/AKfycbyW4IsE-kVB6-9rXPuQy81VaYRv-OLECRyuNJncmpgY--UxjI1pZcFzIV1t_abJ9fVeYw/exec", {
+    fetch("https://script.google.com/macros/s/AKfycbwBVWTbjBZr-DUBEabxGWfXGax6SGlCK3-y14LnYx32sc2N2l1OausBQVOuWi0x62glbg/exec", {
       method: "POST",
+      headers:{ "Content-Type":"text/plain;charset=utf-8" },
       body: JSON.stringify({
         type: "photo",
         name: document.getElementById("name").value || "Anonimo",
@@ -476,9 +476,22 @@ BLOQUE DE FOTO
       navigator.mediaDevices.getUserMedia({ audio: true })
         .then(s => {
           audioStream = s;
-          mediaRecorder = new MediaRecorder(s);
+
+          let options = {};
+          if (MediaRecorder.isTypeSupported("audio/webm"))
+            options.mimeType = "audio/webm";
+          else if (MediaRecorder.isTypeSupported("audio/mp4"))
+            options.mimeType = "audio/mp4";
+
+          try{
+            mediaRecorder = new MediaRecorder(s, options);
+          }catch{
+            // fallback iOS
+            mediaRecorder = null;
+          }
         });
     }
+
 
     const iosAudioInput = document.getElementById("iosAudioInput");
 
@@ -558,8 +571,9 @@ BLOQUE DE FOTO
         sendBtn && (sendBtn.disabled = true);
         document.getElementById("sendAudioBtn")?.setAttribute("disabled", true);
 
-        fetch("https://script.google.com/macros/s/AKfycbyW4IsE-kVB6-9rXPuQy81VaYRv-OLECRyuNJncmpgY--UxjI1pZcFzIV1t_abJ9fVeYw/exec", {
+        fetch("https://script.google.com/macros/s/AKfycbwBVWTbjBZr-DUBEabxGWfXGax6SGlCK3-y14LnYx32sc2N2l1OausBQVOuWi0x62glbg/exec", {
           method: "POST",
+          headers:{ "Content-Type":"text/plain;charset=utf-8" },
           body: JSON.stringify({
             type: "audio",
             name: document.getElementById("audioName").value || "Anonimo",
@@ -587,12 +601,41 @@ BLOQUE DE FOTO
       const reader = new FileReader();
       reader.onload = ()=>{
         predictionImage = reader.result.split(",")[1];
-        document.getElementById("sendPredBtn").disabled = false;
+        updatePredictionButton();
       };
       reader.readAsDataURL(file);
     });
 
+
+    document.getElementById("predName").addEventListener("input", updatePredictionButton);
+    document.getElementById("predPhone").addEventListener("input", updatePredictionButton);
+    document.querySelectorAll('input[name="winner"]').forEach(r=>{
+      r.addEventListener("change", updatePredictionButton);
+    });
+
+
+    function updatePredictionButton(){
+      const name = document.getElementById("predName").value.trim();
+      const phone = document.getElementById("predPhone").value.trim();
+      const winner = document.querySelector('input[name="winner"]:checked');
+
+      const valid =
+        predictionsOpen &&
+        predictionImage &&
+        name.length > 0 &&
+        phone.length > 0 &&
+        winner;
+
+      document.getElementById("sendPredBtn").disabled = !valid;
+    }
+
+
     function sendPrediction(){
+
+      if(!predictionsOpen){
+        alert("Las predicciones ya fueron cerradas 👽");
+        return;
+      }
 
       const name = document.getElementById("predName").value;
       const phone = document.getElementById("predPhone").value;
@@ -611,8 +654,9 @@ BLOQUE DE FOTO
       loadingScreen.style.display = "flex";
       loadingText.innerText = "Registrando tu predicción 👽";
 
-      fetch("https://script.google.com/macros/s/AKfycbyW4IsE-kVB6-9rXPuQy81VaYRv-OLECRyuNJncmpgY--UxjI1pZcFzIV1t_abJ9fVeYw/exec",{
+      fetch("https://script.google.com/macros/s/AKfycbwBVWTbjBZr-DUBEabxGWfXGax6SGlCK3-y14LnYx32sc2N2l1OausBQVOuWi0x62glbg/exec",{
         method:"POST",
+        headers:{ "Content-Type":"text/plain;charset=utf-8" },
         body:JSON.stringify({
           type:"prediction",
           name:name,
@@ -682,57 +726,61 @@ BLOQUE DE FOTO
       document.getElementById("predStatus").innerText = "";
       document.getElementById("status").innerText = "";
       window.scrollTo(0,0);
+      updatePredictionButton();
 
 
       document.getElementById("subtitle").innerText =
         "Elige cómo quieres enviar tu saludo";
     }
 
+    /* ===================== PREDICCIONES ENGINE ===================== */
 
-// APP GET - PREDICCIONES
-    const API_URL = "https://script.google.com/macros/s/AKfycbyW4IsE-kVB6-9rXPuQy81VaYRv-OLECRyuNJncmpgY--UxjI1pZcFzIV1t_abJ9fVeYw/exec";
+    const API_URL = "https://script.google.com/macros/s/AKfycbwBVWTbjBZr-DUBEabxGWfXGax6SGlCK3-y14LnYx32sc2N2l1OausBQVOuWi0x62glbg/exec";
 
     let lastMatchId = null;
     let lastStateHash = null;
+    let predictionsOpen = false;
 
     async function updateMatchState() {
       try {
-        const res = await fetch(API_URL + "?t=" + Date.now()); // evita cache
-        const data = await res.json();
+        const res = await fetch(API_URL + "?t=" + Date.now());
+
+        if (!res.ok) return;
+
+        const text = await res.text();
+
+        let data;
+        try { data = JSON.parse(text); }
+        catch { return; }
 
         const stateHash = JSON.stringify(data);
-
-        // evita re-render innecesario
         if (stateHash === lastStateHash) return;
         lastStateHash = stateHash;
 
-        // ========= EQUIPOS =========
         team1Label.innerText = `${data.team1} (${data.score1})`;
         team2Label.innerText = `${data.team2} (${data.score2})`;
 
-        // ========= BOTON =========
+        predictionsOpen = data.open === true;
+
         const btn = document.getElementById("sendPredBtn");
 
-        if (data.open) {
-          btn.disabled = false;
+        if (predictionsOpen) {
           btn.innerText = "Enviar predicción";
           btn.style.background = "";
+          updatePredictionButton();
         } else {
           btn.disabled = true;
           btn.innerText = "Predicciones cerradas";
           btn.style.background = "#444";
         }
 
-        // ========= NUEVA SERIE =========
         if (lastMatchId && lastMatchId !== data.match_id) {
           resetPredictionForm();
         }
 
         lastMatchId = data.match_id;
 
-      } catch (err) {
-        console.error("API ERROR:", err);
-      }
+      } catch {}
     }
 
     function resetPredictionForm() {
@@ -741,16 +789,13 @@ BLOQUE DE FOTO
       document.getElementById("predImage").value = "";
       predictionImage = null;
 
-      document
-        .querySelectorAll('input[name="winner"]')
-        .forEach(r => r.checked = false);
+      document.querySelectorAll('input[name="winner"]').forEach(r=>r.checked=false);
+      document.getElementById("sendPredBtn").disabled = true;
     }
 
-  // primera carga inmediata
-  updateMatchState();
+    updateMatchState();
+    setInterval(updateMatchState, 45000 + Math.random()*15000);
 
-  // polling inteligente cada 15s (no banea Apps Script)
-  setInterval(updateMatchState, 15000 + Math.random()*5000);
 
 </script>
 
