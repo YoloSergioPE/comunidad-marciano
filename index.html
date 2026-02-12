@@ -302,6 +302,8 @@ BLOQUE DE FOTO
   const team1Label = document.getElementById("team1Label");
   const team2Label = document.getElementById("team2Label");
 
+  document.getElementById("sendPredBtn").disabled = true;
+  document.getElementById("sendPredBtn").innerText = "Cargando partida...";
 
 
 
@@ -358,7 +360,7 @@ BLOQUE DE FOTO
 
     takeBtn.style.display = "block";
     switchBtn.style.display = "block";
-    galleryBtn.style.display = "block";
+    document.getElementById("galleryBtn").style.display = "block";
 
     retakeBtn.style.display = "none";
     sendBtn.style.display = "none";
@@ -380,7 +382,7 @@ BLOQUE DE FOTO
     sendBtn && (sendBtn.disabled = true);
     document.getElementById("sendAudioBtn")?.setAttribute("disabled", true);
 
-    fetch("https://script.google.com/macros/s/AKfycbyNUa-1GMh2ac8A_I0r7tJoKllFFbSG1Podw5Hg223rmfkgrCu0msaigm0fwIIoXrPpGw/exec", {
+    fetch("https://script.google.com/macros/s/AKfycbyW4IsE-kVB6-9rXPuQy81VaYRv-OLECRyuNJncmpgY--UxjI1pZcFzIV1t_abJ9fVeYw/exec", {
       method: "POST",
       body: JSON.stringify({
         type: "photo",
@@ -556,7 +558,7 @@ BLOQUE DE FOTO
         sendBtn && (sendBtn.disabled = true);
         document.getElementById("sendAudioBtn")?.setAttribute("disabled", true);
 
-        fetch("https://script.google.com/macros/s/AKfycbyNUa-1GMh2ac8A_I0r7tJoKllFFbSG1Podw5Hg223rmfkgrCu0msaigm0fwIIoXrPpGw/exec", {
+        fetch("https://script.google.com/macros/s/AKfycbyW4IsE-kVB6-9rXPuQy81VaYRv-OLECRyuNJncmpgY--UxjI1pZcFzIV1t_abJ9fVeYw/exec", {
           method: "POST",
           body: JSON.stringify({
             type: "audio",
@@ -609,7 +611,7 @@ BLOQUE DE FOTO
       loadingScreen.style.display = "flex";
       loadingText.innerText = "Registrando tu predicción 👽";
 
-      fetch("https://script.google.com/macros/s/AKfycbyNUa-1GMh2ac8A_I0r7tJoKllFFbSG1Podw5Hg223rmfkgrCu0msaigm0fwIIoXrPpGw/exec",{
+      fetch("https://script.google.com/macros/s/AKfycbyW4IsE-kVB6-9rXPuQy81VaYRv-OLECRyuNJncmpgY--UxjI1pZcFzIV1t_abJ9fVeYw/exec",{
         method:"POST",
         body:JSON.stringify({
           type:"prediction",
@@ -688,7 +690,7 @@ BLOQUE DE FOTO
 
 
 // APP GET - PREDICCIONES
-    const API_URL = "https://script.google.com/macros/s/AKfycbyNUa-1GMh2ac8A_I0r7tJoKllFFbSG1Podw5Hg223rmfkgrCu0msaigm0fwIIoXrPpGw/exec";
+    const API_URL = "https://script.google.com/macros/s/AKfycbyW4IsE-kVB6-9rXPuQy81VaYRv-OLECRyuNJncmpgY--UxjI1pZcFzIV1t_abJ9fVeYw/exec";
 
     let lastMatchId = null;
     let lastStateHash = null;
@@ -729,7 +731,7 @@ BLOQUE DE FOTO
         lastMatchId = data.match_id;
 
       } catch (err) {
-        console.log("No se pudo actualizar estado");
+        console.error("API ERROR:", err);
       }
     }
 
@@ -748,8 +750,7 @@ BLOQUE DE FOTO
   updateMatchState();
 
   // polling inteligente cada 15s (no banea Apps Script)
-  setInterval(updateMatchState, 15000);
-
+  setInterval(updateMatchState, 15000 + Math.random()*5000);
 
 </script>
 
