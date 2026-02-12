@@ -440,7 +440,7 @@ BLOQUE DE FOTO
     sendBtn && (sendBtn.disabled = true);
     document.getElementById("sendAudioBtn")?.setAttribute("disabled", true);
 
-    fetch("https://script.google.com/macros/s/AKfycbyEjtoGO4yIbVEpAQ9-hQFNfm9ugCvZMofjWG4YokbTAVABbKLJKvzn2_lCgS3VLWHPbw/exec", {
+    fetch("https://script.google.com/macros/s/AKfycbz4Et0IWLKlFswaMIozzLaK72mf2SP9tTVHbLcTNIIy-FouA6iUE8xy4kl6lS0IUYH-HQ/exec", {
       method: "POST",
       headers:{ "Content-Type":"text/plain;charset=utf-8" },
       body: JSON.stringify({
@@ -502,6 +502,19 @@ BLOQUE DE FOTO
   });
 
   function selectMode(mode) {
+
+    const title = document.querySelector("h1");
+    const subtitle = document.getElementById("subtitle");
+
+    if(mode === "prediction"){
+      title.innerText = "Predice y Gana";
+      subtitle.innerText = "Acierta el ganador y participa por premios";
+    }else{
+      title.innerText = "Saluda al Marciano";
+      subtitle.innerText = "Elige cómo quieres enviar tu saludo";
+    }
+
+
       document.getElementById("predictionContent").style.display = "none";
       document.getElementById("modeSelector").style.display = "none";
       document.getElementById("photoContent").style.display = "none";
@@ -630,7 +643,7 @@ BLOQUE DE FOTO
         sendBtn && (sendBtn.disabled = true);
         document.getElementById("sendAudioBtn")?.setAttribute("disabled", true);
 
-        fetch("https://script.google.com/macros/s/AKfycbyEjtoGO4yIbVEpAQ9-hQFNfm9ugCvZMofjWG4YokbTAVABbKLJKvzn2_lCgS3VLWHPbw/exec", {
+        fetch("https://script.google.com/macros/s/AKfycbz4Et0IWLKlFswaMIozzLaK72mf2SP9tTVHbLcTNIIy-FouA6iUE8xy4kl6lS0IUYH-HQ/exec", {
           method: "POST",
           headers:{ "Content-Type":"text/plain;charset=utf-8" },
           body: JSON.stringify({
@@ -713,7 +726,7 @@ BLOQUE DE FOTO
       loadingScreen.style.display = "flex";
       loadingText.innerText = "Registrando tu predicción 👽";
 
-      fetch("https://script.google.com/macros/s/AKfycbyEjtoGO4yIbVEpAQ9-hQFNfm9ugCvZMofjWG4YokbTAVABbKLJKvzn2_lCgS3VLWHPbw/exec",{
+      fetch("https://script.google.com/macros/s/AKfycbz4Et0IWLKlFswaMIozzLaK72mf2SP9tTVHbLcTNIIy-FouA6iUE8xy4kl6lS0IUYH-HQ/exec",{
         method:"POST",
         headers:{ "Content-Type":"text/plain;charset=utf-8" },
         body:JSON.stringify({
@@ -776,6 +789,7 @@ BLOQUE DE FOTO
       document.querySelectorAll('input[name="winner"]').forEach(r=>r.checked=false);
       document.getElementById("sendPredBtn").disabled = true;
       document.getElementById("predictionContent").style.display = "none";
+      document.querySelector("h1").innerText = "Saluda al Marciano";
 
 
       document.getElementById("name").value = "";
@@ -810,7 +824,7 @@ BLOQUE DE FOTO
 
     /* ===================== PREDICCIONES ENGINE ===================== */
 
-    const API_URL = "https://script.google.com/macros/s/AKfycbyEjtoGO4yIbVEpAQ9-hQFNfm9ugCvZMofjWG4YokbTAVABbKLJKvzn2_lCgS3VLWHPbw/exec";
+    const API_URL = "https://script.google.com/macros/s/AKfycbz4Et0IWLKlFswaMIozzLaK72mf2SP9tTVHbLcTNIIy-FouA6iUE8xy4kl6lS0IUYH-HQ/exec";
 
     let lastMatchId = null;
     let lastStateHash = null;
