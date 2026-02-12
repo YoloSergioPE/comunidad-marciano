@@ -165,6 +165,53 @@
       100% { transform: scale(1); opacity: 1; }
     }
 
+.matchPick{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px;
+  margin:18px 0;
+}
+
+.teamCard{
+  flex:1;
+  background:rgba(255,255,255,0.06);
+  border-radius:16px;
+  padding:14px;
+  cursor:pointer;
+  transition:all .18s;
+  border:2px solid transparent;
+}
+
+.teamCard:hover{
+  background:rgba(255,255,255,0.12);
+}
+
+.teamCard.selected{
+  border:2px solid #4da3ff;
+  box-shadow:0 0 18px rgba(77,163,255,.5);
+}
+
+.teamCard img{
+  width:64px;
+  height:64px;
+  object-fit:contain;
+  margin-bottom:6px;
+}
+
+.teamName{
+  font-weight:600;
+  font-size:.95rem;
+}
+
+.scoreBox{
+  font-weight:800;
+  font-size:1.3rem;
+  min-width:70px;
+  text-align:center;
+}
+
+
   </style>
 </head>
 
@@ -249,13 +296,25 @@ BLOQUE DE FOTO
       <input id="predName" placeholder="Nombre completo">
       <input id="predPhone" placeholder="Número celular">
 
-      <div style="margin:12px 0;">
-        <b>Selecciona tu ganador</b>
-        <div>
-          <label><input type="radio" name="winner" value="team1"> <span id="team1Label">Equipo 1</span></label><br>
-          <label><input type="radio" name="winner" value="team2"> <span id="team2Label">Equipo 2</span></label>
+      <div class="matchPick">
+
+        <div class="teamCard" id="team1Card" onclick="pickTeam('team1')">
+          <img id="team1Logo">
+          <div class="teamName" id="team1Label">Equipo 1</div>
         </div>
+
+        <div class="scoreBox">
+          <div id="scoreText">0 - 0</div>
+        </div>
+
+        <div class="teamCard" id="team2Card" onclick="pickTeam('team2')">
+          <img id="team2Logo">
+          <div class="teamName" id="team2Label">Equipo 2</div>
+        </div>
+
       </div>
+      <input type="hidden" id="winnerInput">
+
 
       <input type="file" id="predImage" accept="image/*">
 
@@ -381,7 +440,7 @@ BLOQUE DE FOTO
     sendBtn && (sendBtn.disabled = true);
     document.getElementById("sendAudioBtn")?.setAttribute("disabled", true);
 
-    fetch("https://script.google.com/macros/s/AKfycbxSqyOZkZ5K6JB0r15bC5qwn6TXc-mB1lOG2kC3j8DSnTf1z379di76JP2qJj-uoFAolA/exec", {
+    fetch("https://script.google.com/macros/s/AKfycbyEjtoGO4yIbVEpAQ9-hQFNfm9ugCvZMofjWG4YokbTAVABbKLJKvzn2_lCgS3VLWHPbw/exec", {
       method: "POST",
       headers:{ "Content-Type":"text/plain;charset=utf-8" },
       body: JSON.stringify({
@@ -571,7 +630,7 @@ BLOQUE DE FOTO
         sendBtn && (sendBtn.disabled = true);
         document.getElementById("sendAudioBtn")?.setAttribute("disabled", true);
 
-        fetch("https://script.google.com/macros/s/AKfycbxSqyOZkZ5K6JB0r15bC5qwn6TXc-mB1lOG2kC3j8DSnTf1z379di76JP2qJj-uoFAolA/exec", {
+        fetch("https://script.google.com/macros/s/AKfycbyEjtoGO4yIbVEpAQ9-hQFNfm9ugCvZMofjWG4YokbTAVABbKLJKvzn2_lCgS3VLWHPbw/exec", {
           method: "POST",
           headers:{ "Content-Type":"text/plain;charset=utf-8" },
           body: JSON.stringify({
@@ -617,7 +676,7 @@ BLOQUE DE FOTO
     function updatePredictionButton(){
       const name = document.getElementById("predName").value.trim();
       const phone = document.getElementById("predPhone").value.trim();
-      const winner = document.querySelector('input[name="winner"]:checked');
+      const winner = pickedTeam;
 
       const valid =
         predictionsOpen &&
@@ -654,15 +713,15 @@ BLOQUE DE FOTO
       loadingScreen.style.display = "flex";
       loadingText.innerText = "Registrando tu predicción 👽";
 
-      fetch("https://script.google.com/macros/s/AKfycbxSqyOZkZ5K6JB0r15bC5qwn6TXc-mB1lOG2kC3j8DSnTf1z379di76JP2qJj-uoFAolA/exec",{
+      fetch("https://script.google.com/macros/s/AKfycbyEjtoGO4yIbVEpAQ9-hQFNfm9ugCvZMofjWG4YokbTAVABbKLJKvzn2_lCgS3VLWHPbw/exec",{
         method:"POST",
         headers:{ "Content-Type":"text/plain;charset=utf-8" },
         body:JSON.stringify({
           type:"prediction",
           name:name,
           phone:phone,
-          team:winner.value === "team1" ? team1Label.innerText : team2Label.innerText,
-          rival:winner.value === "team1" ? team2Label.innerText : team1Label.innerText,
+          team: pickedTeam === "team1" ? team1Label.innerText : team2Label.innerText,
+          rival: pickedTeam === "team1" ? team2Label.innerText : team1Label.innerText,
           image:predictionImage
         })
       }).then(()=>{
@@ -733,9 +792,25 @@ BLOQUE DE FOTO
         "Elige cómo quieres enviar tu saludo";
     }
 
+    let pickedTeam = null;
+
+    function pickTeam(team){
+      pickedTeam = team;
+
+      document.getElementById("winnerInput").value = team;
+
+      document.getElementById("team1Card").classList.remove("selected");
+      document.getElementById("team2Card").classList.remove("selected");
+
+      document.getElementById(team+"Card").classList.add("selected");
+
+      updatePredictionButton();
+    }
+
+
     /* ===================== PREDICCIONES ENGINE ===================== */
 
-    const API_URL = "https://script.google.com/macros/s/AKfycbxSqyOZkZ5K6JB0r15bC5qwn6TXc-mB1lOG2kC3j8DSnTf1z379di76JP2qJj-uoFAolA/exec";
+    const API_URL = "https://script.google.com/macros/s/AKfycbyEjtoGO4yIbVEpAQ9-hQFNfm9ugCvZMofjWG4YokbTAVABbKLJKvzn2_lCgS3VLWHPbw/exec";
 
     let lastMatchId = null;
     let lastStateHash = null;
@@ -757,8 +832,13 @@ BLOQUE DE FOTO
         if (stateHash === lastStateHash) return;
         lastStateHash = stateHash;
 
-        team1Label.innerText = `${data.team1} (${data.score1})`;
-        team2Label.innerText = `${data.team2} (${data.score2})`;
+        team1Label.innerText = data.team1;
+        team2Label.innerText = data.team2;
+        scoreText.innerText = `${data.score1} - ${data.score2}`;
+
+        team1Logo.src = data.logo1;
+        team2Logo.src = data.logo2;
+
 
         predictionsOpen = data.open === true;
 
