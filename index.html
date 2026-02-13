@@ -235,7 +235,7 @@ BLOQUE DE FOTO
       <br>
       <hr>
       <br>
-      <button onclick="selectMode('prediction')">🎯 Enviar predicción</button>
+      <button id="mainPredBtn" onclick="selectMode('prediction')">🎯 Enviar predicción</button>
     </div>
 
     <!-- CONTENIDO FOTO -->
@@ -316,7 +316,26 @@ BLOQUE DE FOTO
       <input type="hidden" id="winnerInput">
 
 
+      <div style="margin-top:12px; margin-bottom:6px; font-weight:600;">
+        Comparte tu JIJA de ESTA SERIE
+      </div>
+
       <input type="file" id="predImage" accept="image/*">
+
+      <div style="margin-top:14px; font-size:0.85rem; color:#cfd3ff;">
+        Debe de tener los datos claros
+      </div>
+
+      <img src="assets/ejemplo_apuesta.png"
+          alt="Ejemplo apuesta"
+          style="
+            width:100%;
+            margin-top:8px;
+            border-radius:12px;
+            border:1px solid rgba(255,255,255,.15);
+            opacity:.9;
+          ">
+
 
       <button onclick="sendPrediction()" id="sendPredBtn" disabled>
         Enviar predicción
@@ -538,8 +557,15 @@ BLOQUE DE FOTO
       startAudio(); // permisos SOLO aquí
     }
     if (mode === "prediction") {
-      document.getElementById("predictionContent").style.display = "block";
+
+  if(!predictionsOpen){
+      alert("Las predicciones están cerradas 👽");
+      return;
     }
+
+    document.getElementById("predictionContent").style.display = "block";
+  }
+
 
   }
 
@@ -848,7 +874,6 @@ BLOQUE DE FOTO
 
       try {
         const res = await fetch(API_URL + "?t=" + Date.now());
-
         if (!res.ok) return;
 
         const text = await res.text();
@@ -861,6 +886,8 @@ BLOQUE DE FOTO
         if (stateHash === lastStateHash) return;
         lastStateHash = stateHash;
 
+        /* ================= MATCH INFO ================= */
+
         team1Label.innerText = data.team1;
         team2Label.innerText = data.team2;
         scoreText.innerText = `${data.score1} - ${data.score2}`;
@@ -868,8 +895,23 @@ BLOQUE DE FOTO
         team1Logo.src = data.logo1;
         team2Logo.src = data.logo2;
 
-
         predictionsOpen = data.open === true;
+
+        /* ================= BOTON PRINCIPAL ================= */
+
+        const mainPredBtn = document.getElementById("mainPredBtn");
+
+        if(predictionsOpen){
+          mainPredBtn.disabled = false;
+          mainPredBtn.style.opacity = "1";
+          mainPredBtn.innerText = "🎯 Enviar predicción";
+        }else{
+          mainPredBtn.disabled = true;
+          mainPredBtn.style.opacity = "0.5";
+          mainPredBtn.innerText = "⛔ Predicciones cerradas";
+        }
+
+        /* ================= BOTON INTERNO ================= */
 
         const btn = document.getElementById("sendPredBtn");
 
@@ -883,6 +925,8 @@ BLOQUE DE FOTO
           btn.style.background = "#444";
         }
 
+        /* ================= CAMBIO DE MATCH ================= */
+
         if (lastMatchId && lastMatchId !== data.match_id) {
           resetPredictionForm();
         }
@@ -891,6 +935,7 @@ BLOQUE DE FOTO
 
       } catch {}
     }
+
 
     function resetPredictionForm() {
       document.getElementById("predName").value = "";
