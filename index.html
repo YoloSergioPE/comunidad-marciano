@@ -387,7 +387,9 @@ BLOQUE DE FOTO
   document.getElementById("sendPredBtn").disabled = true;
   document.getElementById("sendPredBtn").innerText = "Cargando partida...";
 
-
+  document.getElementById("mainPredBtn").disabled = true;
+  document.getElementById("mainPredBtn").style.opacity = "0.5";
+  document.getElementById("mainPredBtn").innerText = "⏳ Cargando partida...";
 
   let imageData = null;
   let currentFacing = "user";
@@ -524,48 +526,55 @@ BLOQUE DE FOTO
     reader.readAsDataURL(file);
   });
 
-  function selectMode(mode) {
+ function selectMode(mode) {
 
-    const title = document.querySelector("h1");
-    const subtitle = document.getElementById("subtitle");
+  const title = document.querySelector("h1");
+  const subtitle = document.getElementById("subtitle");
 
-    if(mode === "prediction"){
-      title.innerText = "Predice y Gana";
-      subtitle.innerText = "Acierta el ganador y participa por premios";
-    }else{
-      title.innerText = "Saluda al Marciano";
-      subtitle.innerText = "Elige cómo quieres enviar tu saludo";
-    }
+  // Reset pantallas siempre primero
+  document.getElementById("modeSelector").style.display = "none";
+  document.getElementById("photoContent").style.display = "none";
+  document.getElementById("audioContent").style.display = "none";
+  document.getElementById("predictionContent").style.display = "none";
 
+  /* ================= PREDICTION ================= */
+  if(mode === "prediction"){
 
-      document.getElementById("predictionContent").style.display = "none";
-      document.getElementById("modeSelector").style.display = "none";
-      document.getElementById("photoContent").style.display = "none";
-      document.getElementById("audioContent").style.display = "none";
-
-    if (mode === "photo") {
-      document.getElementById("photoContent").style.display = "block";
-      startCamera(); // permisos SOLO aquí
-    }
-
-    if (mode === "audio") {
-      audioBlob = null;
-      sendAudioBtn.disabled = false;
-      sendAudioBtn.style.display = "none";
-
-      document.getElementById("audioContent").style.display = "block";
-      startAudio(); // permisos SOLO aquí
-    }
-    if (mode === "prediction") {
-
-  if(!predictionsOpen){
-      alert("Las predicciones están cerradas 👽");
+    if(predictionsOpen === null){
+      alert("Cargando datos de la serie...");
+      document.getElementById("modeSelector").style.display = "block";
       return;
     }
 
+    if(predictionsOpen === false){
+      alert("Las predicciones están cerradas 👽");
+      document.getElementById("modeSelector").style.display = "block";
+      return;
+    }
+
+    title.innerText = "Predice y Gana";
+    subtitle.innerText = "Acierta el ganador y participa por premios";
     document.getElementById("predictionContent").style.display = "block";
+    return;
   }
 
+  /* ================= PHOTO ================= */
+  if(mode === "photo"){
+    title.innerText = "Saluda al Marciano";
+    subtitle.innerText = "Elige cómo quieres enviar tu saludo";
+    document.getElementById("photoContent").style.display = "block";
+    startCamera();
+    return;
+  }
+
+  /* ================= AUDIO ================= */
+  if(mode === "audio"){
+    title.innerText = "Saluda al Marciano";
+    subtitle.innerText = "Elige cómo quieres enviar tu saludo";
+    document.getElementById("audioContent").style.display = "block";
+    startAudio();
+    return;
+  }
 
   }
 
@@ -865,7 +874,7 @@ BLOQUE DE FOTO
 
     let lastMatchId = null;
     let lastStateHash = null;
-    let predictionsOpen = false;
+    let predictionsOpen = null;
 
     async function updateMatchState() {
 
@@ -897,19 +906,12 @@ BLOQUE DE FOTO
 
         predictionsOpen = data.open === true;
 
-        /* ================= BOTON PRINCIPAL ================= */
-
-        const mainPredBtn = document.getElementById("mainPredBtn");
-
-        if(predictionsOpen){
-          mainPredBtn.disabled = false;
-          mainPredBtn.style.opacity = "1";
-          mainPredBtn.innerText = "🎯 Enviar predicción";
-        }else{
-          mainPredBtn.disabled = true;
-          mainPredBtn.style.opacity = "0.5";
-          mainPredBtn.innerText = "⛔ Predicciones cerradas";
-        }
+        // Primera carga terminada
+        document.getElementById("mainPredBtn").disabled = !predictionsOpen;
+        document.getElementById("mainPredBtn").style.opacity = predictionsOpen ? "1" : "0.5";
+        document.getElementById("mainPredBtn").innerText = predictionsOpen
+          ? "🎯 Enviar predicción"
+          : "⛔ Predicciones cerradas";
 
         /* ================= BOTON INTERNO ================= */
 
@@ -953,7 +955,7 @@ BLOQUE DE FOTO
 
 
     updateMatchState();
-    setInterval(updateMatchState, 45000 + Math.random()*15000);
+    setInterval(updateMatchState, 12000);
 
 
 </script>
