@@ -173,53 +173,6 @@
       100% { transform: scale(1); opacity: 1; }
     }
 
-.matchPick{
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-  gap:12px;
-  margin:18px 0;
-}
-
-.teamCard{
-  flex:1;
-  background:rgba(255,255,255,0.06);
-  border-radius:16px;
-  padding:14px;
-  cursor:pointer;
-  transition:all .18s;
-  border:2px solid transparent;
-}
-
-.teamCard:hover{
-  background:rgba(255,255,255,0.12);
-}
-
-.teamCard.selected{
-  border:2px solid #4da3ff;
-  box-shadow:0 0 18px rgba(77,163,255,.5);
-}
-
-.teamCard img{
-  width:64px;
-  height:64px;
-  object-fit:contain;
-  margin-bottom:6px;
-}
-
-.teamName{
-  font-weight:600;
-  font-size:.95rem;
-}
-
-.scoreBox{
-  font-weight:800;
-  font-size:1.3rem;
-  min-width:70px;
-  text-align:center;
-}
-
-
   </style>
 </head>
 
@@ -243,7 +196,7 @@ BLOQUE DE FOTO
       <br>
       <hr>
       <br>
-      <button id="mainPredBtn" onclick="selectMode('prediction')">🎯 Enviar predicción</button>
+      <button onclick="selectMode('concurso')">🚗 Concurso KIA</button>
     </div>
 
     <!-- CONTENIDO FOTO -->
@@ -272,6 +225,8 @@ BLOQUE DE FOTO
 
         <div id="status"></div>
       </div>
+
+
       <!-- CONTENIDO AUDIO -->
     <div id="audioContent" style="display:none;">
           <input id="audioName" placeholder="Tu nombre / de donde nos ves">
@@ -298,61 +253,30 @@ BLOQUE DE FOTO
           </div>
           <div id="audioStatus"></div>
     </div>
-    <!-- PREDICCION -->
-      <div id="predictionContent" style="display:none;">
-
-      <input id="predName" placeholder="Nombre completo">
-      <input id="predPhone" placeholder="Número celular">
-
-      <div class="matchPick">
-
-        <div class="teamCard" id="team1Card" onclick="pickTeam('team1')">
-          <img id="team1Logo">
-          <div class="teamName" id="team1Label">Equipo 1</div>
-        </div>
-
-        <div class="scoreBox">
-          <div id="scoreText">0 - 0</div>
-        </div>
-
-        <div class="teamCard" id="team2Card" onclick="pickTeam('team2')">
-          <img id="team2Logo">
-          <div class="teamName" id="team2Label">Equipo 2</div>
-        </div>
-
-      </div>
-      <input type="hidden" id="winnerInput">
 
 
-      <div style="margin-top:12px; margin-bottom:6px; font-weight:600;">
-        Comparte tu JIJA de ESTA SERIE
-      </div>
+      <!-- CONTENIDO CONCURSO -->
+      <div id="concursoContent" style="display:none;">
+        <h2>Participa en el sorteo KIA 🚗</h2>
 
-      <input type="file" id="predImage" accept="image/*">
+        <input id="concursoNombre" placeholder="Nombre completo">
+        <input id="concursoCelular" placeholder="Número de celular">
 
-      <div style="margin-top:14px; font-size:0.85rem; color:#cfd3ff;">
-        Debe de tener los datos claros
-      </div>
+        <input 
+          type="file" 
+          id="concursoFoto" 
+          accept="image/*"
+        >
 
-      <img src="assets/ejemplo_apuesta.png"
-          alt="Ejemplo apuesta"
-          style="
-            width:100%;
-            margin-top:8px;
-            border-radius:12px;
-            border:1px solid rgba(255,255,255,.15);
-            opacity:.9;
-          ">
+        <img id="concursoPreview" class="preview" style="display:none;" />
 
+        <button onclick="enviarConcurso()" id="concursoBtn">
+          Enviar participación
+        </button>
 
-      <button onclick="sendPrediction()" id="sendPredBtn" disabled>
-        Enviar predicción
-      </button>
+        <div id="concursoStatus"></div>
+      </div> 
 
-      <div id="predStatus"></div>
-
-    </div>
-  </div>
 
 <!-- LOADING GLOBAL -->
 <div id="loadingScreen">
@@ -385,24 +309,9 @@ BLOQUE DE FOTO
   const mainCard = document.getElementById("mainCard");
   const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
 
-  const team1Label = document.getElementById("team1Label");
-  const team2Label = document.getElementById("team2Label");
-
-  const scoreText = document.getElementById("scoreText");
-  const team1Logo = document.getElementById("team1Logo");
-  const team2Logo = document.getElementById("team2Logo");
-
-  document.getElementById("sendPredBtn").disabled = true;
-  document.getElementById("sendPredBtn").innerText = "Cargando partida...";
-
-  document.getElementById("mainPredBtn").disabled = true;
-  document.getElementById("mainPredBtn").style.opacity = "0.5";
-  document.getElementById("mainPredBtn").innerText = "⏳ Cargando partida...";
-
   let imageData = null;
   let currentFacing = "user";
   let stream = null;
-  let predictionImage = null;
 
 
   function startCamera() {
@@ -455,7 +364,6 @@ BLOQUE DE FOTO
 
     retakeBtn.style.display = "none";
     sendBtn.style.display = "none";
-
     galleryInput.value = "";
     statusText.innerText = "";
     sendBtn.disabled = false;
@@ -543,29 +451,15 @@ BLOQUE DE FOTO
   document.getElementById("modeSelector").style.display = "none";
   document.getElementById("photoContent").style.display = "none";
   document.getElementById("audioContent").style.display = "none";
-  document.getElementById("predictionContent").style.display = "none";
 
-  /* ================= PREDICTION ================= */
-  if(mode === "prediction"){
+  /* ================= Concurso de KIA ================= */
+  if(mode === "concurso"){
+  title.innerText = "Concurso KIA 🚗";
+  subtitle.innerText = "Sube tu comprobante y participa";
 
-    if(predictionsOpen === null){
-      alert("Cargando datos de la serie...");
-      document.getElementById("modeSelector").style.display = "block";
-      return;
-    }
-
-    if(predictionsOpen === false){
-      alert("Las predicciones están cerradas 👽");
-      document.getElementById("modeSelector").style.display = "block";
-      return;
-    }
-
-    title.innerText = "Predice y Gana";
-    subtitle.innerText = "Acierta el ganador y participa por premios";
-    document.getElementById("predictionContent").style.display = "block";
-    return;
-  }
-
+  document.getElementById("concursoContent").style.display = "block";
+  return;
+}
   /* ================= PHOTO ================= */
   if(mode === "photo"){
     title.innerText = "Saluda al Marciano";
@@ -713,94 +607,74 @@ BLOQUE DE FOTO
       reader.readAsDataURL(audioBlob);
     }
 
-    document.getElementById("predImage").addEventListener("change", e=>{
-      const file = e.target.files[0];
-      if(!file) return;
 
-      const reader = new FileReader();
-      reader.onload = ()=>{
-        predictionImage = reader.result.split(",")[1];
-        updatePredictionButton();
-      };
-      reader.readAsDataURL(file);
-    });
+/*== FUNCION de KIA CONCURSO ==*/
+let concursoImage = null;
 
+const concursoInput = document.getElementById("concursoFoto");
+const concursoPreview = document.getElementById("concursoPreview");
 
-    document.getElementById("predName").addEventListener("input", updatePredictionButton);
-    document.getElementById("predPhone").addEventListener("input", updatePredictionButton);
+concursoInput.addEventListener("change", () => {
+  const file = concursoInput.files[0];
+  if (!file) return;
 
+  if (!file.type.startsWith("image/")) {
+    alert("Solo se permiten imágenes");
+    return;
+  }
 
-    function updatePredictionButton(){
-      const name = document.getElementById("predName").value.trim();
-      const phone = document.getElementById("predPhone").value.trim();
-      const winner = pickedTeam;
+  const reader = new FileReader();
+  reader.onload = () => {
+    concursoImage = reader.result.split(",")[1];
+    concursoPreview.src = reader.result;
+    concursoPreview.style.display = "block";
+  };
 
-      const valid =
-        predictionsOpen &&
-        predictionImage &&
-        name.length > 0 &&
-        phone.length > 0 &&
-        winner;
+  reader.readAsDataURL(file);
+});
 
-      document.getElementById("sendPredBtn").disabled = !valid;
-    }
+function enviarConcurso() {
+  const nombre = document.getElementById("concursoNombre").value.trim();
+  const celular = document.getElementById("concursoCelular").value.trim();
+  const status = document.getElementById("concursoStatus");
 
+  if (!nombre || !celular || !concursoImage) {
+    alert("Completa todos los campos");
+    return;
+  }
 
-    function sendPrediction(){
+  if (celular.length < 9) {
+    alert("Número inválido");
+    return;
+  }
 
-      if(!predictionsOpen){
-        alert("Las predicciones ya fueron cerradas 👽");
-        return;
-      }
+  // UI loading (reutilizas tu sistema actual)
+  mainCard.style.display = "none";
+  loadingScreen.style.display = "flex";
 
-      const name = document.getElementById("predName").value;
-      const phone = document.getElementById("predPhone").value;
+  loadingText.innerText = "Enviando participación 👽";
+  document.getElementById("loadingActions").style.display = "none";
 
-      if(!pickedTeam){
-        alert("Selecciona un equipo");
-        return;
-      }
-
-      if(!name || !phone || !predictionImage){
-        alert("Completa todos los campos");
-        return;
-      }
-
-      document.getElementById("sendPredBtn").disabled = true;
-
-      mainCard.style.display = "none";
-      loadingScreen.style.display = "flex";
-      loadingText.innerText = "Registrando tu predicción 👽";
-
-      fetch("https://script.google.com/macros/s/AKfycbzHpm3gD1kqla53tJ0VdpaPdSvSb4-ZTux4tuXJuSqbbBuy5ov-kNzYov9C-vovKQpu5A/exec",{
-        method:"POST",
-        headers:{ "Content-Type":"text/plain;charset=utf-8" },
-        body:JSON.stringify({
-          type:"prediction",
-          name:name,
-          phone:phone,
-          team: pickedTeam === "team1" ? team1Label.innerText : team2Label.innerText,
-          rival: pickedTeam === "team1" ? team2Label.innerText : team1Label.innerText,
-          image:predictionImage
-        })
-      }).then(r => r.json())
-      .then(r=>{
-        if(!r.success) throw new Error(r.error);
-
-        loadingText.innerHTML = `Tu predicción ha sido enviada mi marcianin 👽<br><br>
-        <a class="whatsapp-btn" target="_blank"
+  fetch("https://script.google.com/macros/s/AKfycbzHpm3gD1kqla53tJ0VdpaPdSvSb4-ZTux4tuXJuSqbbBuy5ov-kNzYov9C-vovKQpu5A/exec", {
+    method: "POST",
+    headers: { "Content-Type": "text/plain;charset=utf-8" },
+    body: JSON.stringify({
+      type: "concurso",
+      nombre: nombre,
+      celular: celular,
+      imagen: concursoImage
+    })
+  }).then(() => {
+    loadingText.innerHTML = `
+      👽 Tu participación fue enviada<br><br>
+      <a class="whatsapp-btn" target="_blank"
         href="https://chat.whatsapp.com/IviDOt7pRjbCywAfzSFe6d">
-        Unirme a la comunidad 🚀</a>`;
-
-        document.getElementById("loadingActions").style.display = "block";
-      })
-      .catch(()=>{
-        loadingText.innerHTML = `⚠️ No pudimos registrar tu predicción.
-        Revisa tu conexión e intenta nuevamente.`;
-        document.getElementById("loadingActions").style.display = "block";
-      });
-    }
-
+        Unirme a la comunidad 🚀
+      </a>
+    `;
+    document.getElementById("loadingActions").style.display = "block";
+  });
+}
 
 
     function resetApp() {
@@ -836,135 +710,20 @@ BLOQUE DE FOTO
       sendAudioBtn.disabled = false;
       sendAudioBtn.style.display = "none";
 
-      predictionImage = null;
-      document.getElementById("predImage").value = "";
-      document.getElementById("sendPredBtn").disabled = true;
-      document.getElementById("team1Card").classList.remove("selected");
-      document.getElementById("team2Card").classList.remove("selected");
-      pickedTeam = null;
-      document.getElementById("predictionContent").style.display = "none";
+      
       document.querySelector("h1").innerText = "Saluda al Marciano";
-
 
       document.getElementById("name").value = "";
       document.getElementById("message").value = "";
       document.getElementById("audioName").value = "";
 
-      document.getElementById("predStatus").innerText = "";
+  
       document.getElementById("status").innerText = "";
       window.scrollTo(0,0);
-      updatePredictionButton();
-
 
       document.getElementById("subtitle").innerText =
         "Elige cómo quieres enviar tu saludo";
     }
-
-    let pickedTeam = null;
-
-    function pickTeam(team){
-      pickedTeam = team;
-
-      document.getElementById("winnerInput").value = team;
-
-      document.getElementById("team1Card").classList.remove("selected");
-      document.getElementById("team2Card").classList.remove("selected");
-
-      document.getElementById(team+"Card").classList.add("selected");
-
-      updatePredictionButton();
-    }
-
-
-    /* ===================== PREDICCIONES ENGINE ===================== */
-
-    const API_URL = "https://script.google.com/macros/s/AKfycbzHpm3gD1kqla53tJ0VdpaPdSvSb4-ZTux4tuXJuSqbbBuy5ov-kNzYov9C-vovKQpu5A/exec";
-
-    let lastMatchId = null;
-    let lastStateHash = null;
-    let predictionsOpen = null;
-
-    async function updateMatchState() {
-
-      team1Logo.onerror = () => team1Logo.src = "assets/default_team.png";
-      team2Logo.onerror = () => team2Logo.src = "assets/default_team.png";
-
-      try {
-        const res = await fetch(API_URL + "?t=" + Date.now());
-        if (!res.ok) return;
-
-        const text = await res.text();
-
-        let data;
-        try { data = JSON.parse(text); }
-        catch { return; }
-
-        const stateHash = JSON.stringify(data);
-        if (stateHash === lastStateHash) return;
-        lastStateHash = stateHash;
-
-        /* ================= MATCH INFO ================= */
-
-        team1Label.innerText = data.team1;
-        team2Label.innerText = data.team2;
-        scoreText.innerText = `${data.score1} - ${data.score2}`;
-
-        team1Logo.src = data.logo1;
-        team2Logo.src = data.logo2;
-
-        predictionsOpen = data.open === true;
-
-        // Primera carga terminada
-        document.getElementById("mainPredBtn").disabled = !predictionsOpen;
-        document.getElementById("mainPredBtn").style.opacity = predictionsOpen ? "1" : "0.5";
-        document.getElementById("mainPredBtn").innerText = predictionsOpen
-          ? "🎯 Enviar predicción"
-          : "⛔ Predicciones cerradas";
-
-        /* ================= BOTON INTERNO ================= */
-
-        const btn = document.getElementById("sendPredBtn");
-
-        if (predictionsOpen) {
-          btn.innerText = "Enviar predicción";
-          btn.style.background = "";
-          updatePredictionButton();
-        } else {
-          btn.disabled = true;
-          btn.innerText = "Predicciones cerradas";
-          btn.style.background = "#444";
-        }
-
-        /* ================= CAMBIO DE MATCH ================= */
-
-        if (lastMatchId && lastMatchId !== data.match_id) {
-          resetPredictionForm();
-        }
-
-        lastMatchId = data.match_id;
-
-      } catch {}
-    }
-
-
-    function resetPredictionForm() {
-      document.getElementById("predName").value = "";
-      document.getElementById("predPhone").value = "";
-      document.getElementById("predImage").value = "";
-      predictionImage = null;
-
-      pickedTeam = null;
-
-      document.getElementById("team1Card").classList.remove("selected");
-      document.getElementById("team2Card").classList.remove("selected");
-
-      document.getElementById("sendPredBtn").disabled = true;
-    }
-
-
-    updateMatchState();
-    setInterval(updateMatchState, 12000);
-
 
 </script>
 
