@@ -173,6 +173,22 @@
       100% { transform: scale(1); opacity: 1; }
     }
 
+/*== ESTILOS DE BARRA DE CARGA ==*/
+#progressContainer {
+  width: 100%;
+  height: 10px;
+  background: rgba(255,255,255,0.15);
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+#progressBar {
+  width: 0%;
+  height: 100%;
+  background: linear-gradient(90deg, #1f8bff, #5f9dff);
+  transition: width 0.2s linear;
+}
+
   </style>
 </head>
 
@@ -283,6 +299,11 @@ BLOQUE DE FOTO
   <div class="loading-box">
     <h2 id="loadingText"></h2>
 
+    <!-- PROGRESS BAR -->
+    <div id="progressContainer" style="margin-top:15px;">
+      <div id="progressBar"></div>
+    </div>
+
     <div id="loadingActions" style="display:none;">
       <button class="secondary" onclick="resetApp()">
         Volver al inicio
@@ -374,8 +395,9 @@ BLOQUE DE FOTO
   function send() {
     mainCard.style.display = "none";
     loadingScreen.style.display = "flex";
+    document.getElementById("progressBar").style.width = "0%";
     
-    loadingText.innerText = "Tu saludo se está enviando, Marcianin 👽";
+    loadingText.innerText = "Procesando tu envío... 👽";
     document.getElementById("loadingActions").style.display = "none";
 
     sendBtn && (sendBtn.disabled = true);
@@ -391,14 +413,18 @@ BLOQUE DE FOTO
         image: imageData
       })
     }).then(() => {
-      loadingText.innerHTML = `
-        Tus saludos han sido enviados mi marcianin 👽<br><br>
-        <a class="whatsapp-btn" target="_blank"
-           href="https://chat.whatsapp.com/IviDOt7pRjbCywAfzSFe6d">
-           Unirme a la comunidad 🚀
-        </a>
-      `;
-      document.getElementById("loadingActions").style.display = "block";
+
+      iniciarLoadingConBarra(() => {
+        loadingText.innerHTML = `
+          Tus saludos han sido enviados mi marcianin 👽<br><br>
+          <a class="whatsapp-btn" target="_blank"
+            href="https://chat.whatsapp.com/IviDOt7pRjbCywAfzSFe6d">
+            Unirme a la comunidad 🚀
+          </a>
+        `;
+
+        document.getElementById("loadingActions").style.display = "block";
+      });
     });
   }
 
@@ -571,8 +597,9 @@ BLOQUE DE FOTO
     function sendAudio() {
       mainCard.style.display = "none";
       loadingScreen.style.display = "flex";
+      document.getElementById("progressBar").style.width = "0%";
       
-      loadingText.innerText = "Tu saludo se está enviando, Marcianin 👽";
+      loadingText.innerText = "Procesando tu envío... 👽";
       document.getElementById("loadingActions").style.display = "none";
 
 
@@ -593,14 +620,18 @@ BLOQUE DE FOTO
             audio: base64Audio
           })
         }).then(() => {
-          loadingText.innerHTML = `
-            Tus saludos han sido enviados mi marcianin 👽<br><br>
-            <a class="whatsapp-btn" target="_blank"
-              href="https://chat.whatsapp.com/IviDOt7pRjbCywAfzSFe6d">
-              Unirme a la comunidad 🚀
-            </a>
-          `;
-          document.getElementById("loadingActions").style.display = "block";
+          iniciarLoadingConBarra(() => {
+            loadingText.innerHTML = `
+              Tus saludos han sido enviados mi marcianin 👽<br><br>
+              <a class="whatsapp-btn" target="_blank"
+                href="https://chat.whatsapp.com/IviDOt7pRjbCywAfzSFe6d">
+                Unirme a la comunidad 🚀
+              </a>
+            `;
+
+            document.getElementById("loadingActions").style.display = "block";
+          });
+
         });
       };
 
@@ -651,8 +682,9 @@ function enviarConcurso() {
   // UI loading (reutilizas tu sistema actual)
   mainCard.style.display = "none";
   loadingScreen.style.display = "flex";
+  document.getElementById("progressBar").style.width = "0%";
 
-  loadingText.innerText = "Enviando participación 👽";
+  loadingText.innerText = "Procesando tu envío... 👽";
   document.getElementById("loadingActions").style.display = "none";
 
   fetch("https://script.google.com/macros/s/AKfycbymto6TIdZTbYgeq3630YAbRG-5tilj0uPpuZfnW04pWJPWoZrZ533jZkPwAVc-X-kTWQ/exec", {
@@ -665,15 +697,18 @@ function enviarConcurso() {
       imagen: concursoImage
     })
   }).then(() => {
-    loadingText.innerHTML = `
-      👽 Tu participación fue enviada<br><br>
-      <a class="whatsapp-btn" target="_blank"
-        href="https://chat.whatsapp.com/IviDOt7pRjbCywAfzSFe6d">
-        Unirme a la comunidad 🚀
-      </a>
-    `;
-    document.getElementById("loadingActions").style.display = "block";
-  });
+      iniciarLoadingConBarra(() => {
+        loadingText.innerHTML = `
+          👽 Tu participación fue enviada<br><br>
+          <a class="whatsapp-btn" target="_blank"
+            href="https://chat.whatsapp.com/IviDOt7pRjbCywAfzSFe6d">
+            Unirme a la comunidad 🚀
+          </a>
+        `;
+
+        document.getElementById("loadingActions").style.display = "block";
+      });
+    });
 }
 
 
@@ -725,6 +760,32 @@ function enviarConcurso() {
         "Elige cómo quieres enviar tu saludo";
     }
 
+
+
+    /*== FUNCION DE BARRA DE CARGA ==*/
+function iniciarLoadingConBarra(callbackFinal) {
+  const progressBar = document.getElementById("progressBar");
+
+  let progress = 5;
+  progressBar.style.width = "5%";
+  const duration = 8000; // 8 segundos
+  const intervalTime = 100; // ms
+  const increment = 100 / (duration / intervalTime);
+
+  const interval = setInterval(() => {
+    progress += increment;
+
+    if (progress >= 100) {
+      progress = 100;
+      clearInterval(interval);
+
+      // Mostrar resultado final
+      callbackFinal();
+    }
+
+    progressBar.style.width = progress + "%";
+  }, intervalTime);
+}
 </script>
 
 </body>
