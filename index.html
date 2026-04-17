@@ -314,19 +314,19 @@
 
   <div class="card" id="mainCard">
     <img src="assets/logo.png" class="logo" alt="El Marciano">
-    <h1>Saluda al Marciano</h1>
+    <h1>Concurso KIA 🚗</h1>
     <p class="subtitle" id="subtitle">
-      Elige cómo quieres enviar tu saludo
+      Participa del sorteo de S/80. al final del Stream
     </p>
 
 
     <!-- SELECTOR -->
     <div id="modeSelector">
-      <button onclick="selectMode('photo')">📸 Envía tu foto</button>
-      <button onclick="selectMode('audio')">🎙️ Envía tu audio</button>
+     <!-- <button onclick="selectMode('photo')">📸 Envía tu foto</button> -->
+     <!-- <button onclick="selectMode('audio')">🎙️ Envía tu audio</button> 
       <br>
       <hr>
-      <br>
+      <br>-->
       <button onclick="selectMode('concurso')">🚗 Concurso KIA</button>
     </div>
 
@@ -394,25 +394,26 @@
         <!-- INPUTS CON LABEL -->
         <div class="inputGroup">
           <label>Tu nombre completo</label>
-          <input id="concursoNombre" placeholder="Ej: Sergio Pérez">
+          <input id="concursoNombre" placeholder="Ej: Marciano Lujan Carrion">
         </div>
 
         <div class="inputGroup">
           <label>Número de WhatsApp</label>
           <input id="concursoCelular" placeholder="Ej: 987654321">
+          <label>📌Nota: Si eres ganador, nos comunicaremos a este número mediante WhatsApp</label>
         </div>
 
         <!-- REFERENCIA + BOTÓN -->
         <div class="uploadBox">
 
-          <p class="helperText">
-            Sube una captura como esta 👇
-          </p>
-
           <!-- BOTÓN BONITO -->
           <button class="secondary" onclick="abrirInputConcurso()">
             📤 Subir imagen
           </button>
+
+          <p class="helperText">
+            Sube una captura como esta 👇
+          </p>
 
           <!-- INPUT OCULTO -->
           <input 
@@ -967,7 +968,7 @@ const concursoPreview = document.getElementById("concursoPreview");
         let progress = 0;
 
         loaderInterval = setInterval(() => {
-          progress += 1.25;
+          progress += 2.25;
 
           if (progress >= 100) {
             progress = 100;
