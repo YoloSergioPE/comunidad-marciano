@@ -214,6 +214,69 @@
   transition: width 0.1s linear;
 }
 
+
+/* CARD MENSAJE FINAL */
+
+.finalCard {
+  width: 100%;
+  max-width: 320px;
+  padding: 20px;
+  border-radius: 18px;
+
+  background: rgba(0,0,0,0.5);
+  backdrop-filter: blur(12px);
+
+  border: 1px solid rgba(255,255,255,0.15);
+
+  box-shadow: 0 10px 30px rgba(0,0,0,0.6);
+}
+
+.finalLogo {
+  width: 70px;
+  margin-bottom: 10px;
+  border-radius: 14px;
+}
+
+.finalText {
+  font-size: 0.95rem;
+  margin-bottom: 15px;
+  color: #cfd3ff;
+}
+
+.finalFooter {
+  margin-top: 18px;
+  font-size: 0.8rem;
+  opacity: 0.7;
+}
+
+/* CSS para Img Referencia */
+.helperText {
+  font-size: 0.8rem;
+  opacity: 0.7;
+  margin: 8px 0 6px;
+}
+
+/* Imagen de referencia */
+.referenciaImg {
+  width: 100%;
+  max-height: 180px;
+  object-fit: contain;
+  border-radius: 10px;
+  margin-bottom: 10px;
+  opacity: 0.85;
+}
+
+/* Preview usuario (más destacado) */
+#concursoPreview {
+  width: 100%;
+  max-height: 200px;
+  object-fit: contain;
+  border-radius: 12px;
+  margin-top: 10px;
+  background: rgba(0,0,0,0.4);
+  padding: 6px;
+  border: 2px solid rgba(95,157,255,0.6);
+}
   </style>
 </head>
 
@@ -300,20 +363,35 @@
         <input id="concursoNombre" placeholder="Nombre completo">
         <input id="concursoCelular" placeholder="Número de celular">
 
+        <!-- 🔥 REFERENCIA -->
+        <p class="helperText">Ejemplo de la captura que debes subir 👇</p>
+
+        <img src="assets/imgKIA.png" class="referenciaImg">
+
+        <!-- INPUT REAL -->
         <input 
           type="file" 
           id="concursoFoto" 
           accept="image/*"
         >
 
+        <!-- PREVIEW USUARIO -->
         <img id="concursoPreview" class="preview" style="display:none;" />
+
+        <button 
+          class="secondary" 
+          onclick="reemplazarImagen()" 
+          id="reuploadBtn"
+          style="display:none;">
+          Cambiar imagen
+        </button>
 
         <button onclick="enviarConcurso()" id="concursoBtn">
           Enviar participación
         </button>
 
         <div id="concursoStatus"></div>
-      </div> 
+      </div>
   </div>
   <!-- CONTENIDO LOADING GLOBAL -->
       <div id="loadingOverlay">
@@ -404,43 +482,59 @@
 
 
   function send() {
-    console.log("CLICK SEND");
-    mainCard.style.display = "none";
-    loadingScreen.style.display = "flex";
-    mainCard.style.display = "none";
-    document.getElementById("progressBar").style.width = "0%";
-    
-    loadingText.innerText = "Procesando tu envío... 👽";
-    document.getElementById("loadingActions").style.display = "none";
+      console.log("CLICK SEND");
 
-    sendBtn && (sendBtn.disabled = true);
-    const audioBtn = document.getElementById("sendAudioBtn");
-    if (audioBtn) audioBtn.setAttribute("disabled", true);
+      const name = document.getElementById("name").value.trim();
+      const message = document.getElementById("message").value.trim();
 
-    fetch("https://script.google.com/macros/s/AKfycbymto6TIdZTbYgeq3630YAbRG-5tilj0uPpuZfnW04pWJPWoZrZ533jZkPwAVc-X-kTWQ/exec", {
-      method: "POST",
-      headers:{ "Content-Type":"text/plain;charset=utf-8" },
-      body: JSON.stringify({
-        type: "photo",
-        name: document.getElementById("name").value || "Anonimo",
-        message: document.getElementById("message").value || "",
-        image: imageData
-      })
-    }).then(() => {
-        console.log("INICIANDO BARRA");
-        loadingText.innerHTML = `
-          Tus saludos han sido enviados mi marcianin 👽<br><br>
-          <a class="whatsapp-btn" target="_blank"
-            href="https://chat.whatsapp.com/IviDOt7pRjbCywAfzSFe6d">
-            Unirme a la comunidad 🚀
-          </a>
+      if (!imageData) {
+        alert("Debes tomar o subir una foto");
+        return;
+      }
+
+      // 🔥 ocultar UI
+      mainCard.style.display = "none";
+
+      // 🔥 iniciar loader (independiente del fetch)
+      startLoader(() => {
+        document.getElementById("loadingMessage").innerHTML = `
+          <div class="finalCard">
+            <img src="assets/logo.png" class="finalLogo">
+
+            <h2>👽 Felicidades</h2>
+            <p class="finalText">
+              Tu saludo fue enviado correctamente
+            </p>
+
+            <a class="whatsapp-btn" target="_blank"
+              href="https://chat.whatsapp.com/IviDOt7pRjbCywAfzSFe6d">
+              Únete a la Comunidad del Marciano 🚀
+            </a>
+
+            <p class="finalFooter">América Esports - 2026</p>
+          </div>
         `;
+      });
 
-        document.getElementById("loadingActions").style.display = "block";
-      
-    });
-    console.log("CLICK SEND");
-  }
+      // 🔥 desactivar botones (anti spam)
+      if (sendBtn) sendBtn.disabled = true;
+      const audioBtn = document.getElementById("sendAudioBtn");
+      if (audioBtn) audioBtn.setAttribute("disabled", true);
+
+      // 🔥 fetch en paralelo (NO bloquea UI)
+      fetch("https://script.google.com/macros/s/AKfycbymto6TIdZTbYgeq3630YAbRG-5tilj0uPpuZfnW04pWJPWoZrZ533jZkPwAVc-X-kTWQ/exec", {
+        method: "POST",
+        headers: { "Content-Type": "text/plain;charset=utf-8" },
+        body: JSON.stringify({
+          type: "photo",
+          name: name || "Anonimo",
+          message: message || "",
+          image: imageData
+        })
+      })
+      .then(() => console.log("FETCH OK (photo)"))
+      .catch(err => console.error("FETCH ERROR (photo):", err));
+    }
 
   const galleryInput = document.getElementById("galleryInput");
   const galleryBtn = document.getElementById("galleryBtn");
@@ -657,24 +751,27 @@ let concursoImage = null;
 const concursoInput = document.getElementById("concursoFoto");
 const concursoPreview = document.getElementById("concursoPreview");
 
-concursoInput.addEventListener("change", () => {
-  const file = concursoInput.files[0];
-  if (!file) return;
+    concursoInput.addEventListener("change", () => {
+      const file = concursoInput.files[0];
+      if (!file) return;
 
-  if (!file.type.startsWith("image/")) {
-    alert("Solo se permiten imágenes");
-    return;
-  }
+      if (!file.type.startsWith("image/")) {
+        alert("Solo se permiten imágenes");
+        return;
+      }
 
-  const reader = new FileReader();
-  reader.onload = () => {
-    concursoImage = reader.result.split(",")[1];
-    concursoPreview.src = reader.result;
-    concursoPreview.style.display = "block";
-  };
+      const reader = new FileReader();
+      reader.onload = () => {
+        concursoImage = reader.result.split(",")[1];
 
-  reader.readAsDataURL(file);
-});
+        concursoPreview.src = reader.result;
+        concursoPreview.style.display = "block";
+
+        document.getElementById("reuploadBtn").style.display = "block"; // 🔥
+      };
+
+      reader.readAsDataURL(file);
+    });
 
 
     /*======= ENVIAR CONCURSO ==========*/
@@ -698,11 +795,21 @@ concursoInput.addEventListener("change", () => {
       // 🔥 iniciar loader (independiente del fetch)
       startLoader(() => {
         document.getElementById("loadingMessage").innerHTML = `
-          👽 Participación enviada<br><br>
-          <a class="whatsapp-btn" target="_blank"
-            href="https://chat.whatsapp.com/IviDOt7pRjbCywAfzSFe6d">
-            Unirme 🚀
-          </a>
+          <div class="finalCard">
+            <img src="assets/logo.png" class="finalLogo">
+
+            <h2>👽 Felicidades</h2>
+            <p class="finalText">
+              Tu mensaje fue enviado correctamente
+            </p>
+
+            <a class="whatsapp-btn" target="_blank"
+              href="https://chat.whatsapp.com/IviDOt7pRjbCywAfzSFe6d">
+              Únete a la Comunidad del Marciano 🚀
+            </a>
+
+            <p class="finalFooter">América Esports - 2026</p>
+          </div>
         `;
       });
 
@@ -721,6 +828,12 @@ concursoInput.addEventListener("change", () => {
       .catch(err => console.error("FETCH ERROR:", err));
     }
 
+
+    /* Funcion para REEMPLAZAR IMG DEL CONCURSO */
+
+    function reemplazarImagen() {
+      document.getElementById("concursoFoto").click();
+    }
 
     function resetApp() {
       loadingScreen.style.display = "none";
