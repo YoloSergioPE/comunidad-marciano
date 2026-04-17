@@ -674,7 +674,6 @@ concursoInput.addEventListener("change", () => {
 function enviarConcurso() {
   const nombre = document.getElementById("concursoNombre").value.trim();
   const celular = document.getElementById("concursoCelular").value.trim();
-  const status = document.getElementById("concursoStatus");
 
   if (!nombre || !celular || !concursoImage) {
     alert("Completa todos los campos");
@@ -686,7 +685,7 @@ function enviarConcurso() {
     return;
   }
 
-  // UI loading (reutilizas tu sistema actual)
+  // ================= UI LOADING =================
   mainCard.style.display = "none";
   loadingScreen.style.display = "flex";
   document.getElementById("progressBar").style.width = "0%";
@@ -694,6 +693,20 @@ function enviarConcurso() {
   loadingText.innerText = "Procesando tu envío... 👽";
   document.getElementById("loadingActions").style.display = "none";
 
+  // ================= BARRA (INDEPENDIENTE) =================
+  iniciarLoadingConBarra(() => {
+    loadingText.innerHTML = `
+      👽 Tu participación fue enviada<br><br>
+      <a class="whatsapp-btn" target="_blank"
+        href="https://chat.whatsapp.com/IviDOt7pRjbCywAfzSFe6d">
+        Unirme a la comunidad 🚀
+      </a>
+    `;
+
+    document.getElementById("loadingActions").style.display = "block";
+  });
+
+  // ================= FETCH EN PARALELO =================
   fetch("https://script.google.com/macros/s/AKfycbymto6TIdZTbYgeq3630YAbRG-5tilj0uPpuZfnW04pWJPWoZrZ533jZkPwAVc-X-kTWQ/exec", {
     method: "POST",
     headers: { "Content-Type": "text/plain;charset=utf-8" },
@@ -703,19 +716,14 @@ function enviarConcurso() {
       celular: celular,
       imagen: concursoImage
     })
-  }).then(() => {
-      iniciarLoadingConBarra(() => {
-        loadingText.innerHTML = `
-          👽 Tu participación fue enviada<br><br>
-          <a class="whatsapp-btn" target="_blank"
-            href="https://chat.whatsapp.com/IviDOt7pRjbCywAfzSFe6d">
-            Unirme a la comunidad 🚀
-          </a>
-        `;
-
-        document.getElementById("loadingActions").style.display = "block";
-      });
-    });
+  })
+  .then(() => {
+    console.log("FETCH OK (concurso)");
+  })
+  .catch((err) => {
+    console.error("FETCH ERROR (concurso):", err);
+    // 👉 No rompemos UX, la barra sigue normal
+  });
 }
 
 
@@ -770,6 +778,8 @@ function enviarConcurso() {
 
 
     /*== FUNCION DE BARRA DE CARGA ==*/
+      let loadingInterval = null;
+
       function iniciarLoadingConBarra(callbackFinal) {
         const progressBar = document.getElementById("progressBar");
 
@@ -778,25 +788,35 @@ function enviarConcurso() {
           return;
         }
 
-        let progress = 5;
-        progressBar.style.width = "5%";
+        // 🔥 LIMPIA cualquier intervalo previo
+        if (loadingInterval) {
+          clearInterval(loadingInterval);
+        }
 
-        const duration = 8000;
-        const intervalTime = 100;
-        const increment = 100 / (duration / intervalTime);
+        let progress = 0;
+        progressBar.style.width = "0%";
 
-        const interval = setInterval(() => {
+        const duration = 8000; // 8 segundos
+        const steps = 80; // 8000 / 100ms
+        const increment = 100 / steps;
+
+        loadingInterval = setInterval(() => {
           progress += increment;
 
           if (progress >= 100) {
             progress = 100;
-            clearInterval(interval);
+            progressBar.style.width = "100%";
 
+            clearInterval(loadingInterval);
+            loadingInterval = null;
+
+            console.log("BARRA TERMINADA");
             callbackFinal();
+            return;
           }
 
           progressBar.style.width = progress + "%";
-        }, intervalTime);
+        }, 100);
       }
 </script>
 
