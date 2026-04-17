@@ -393,15 +393,18 @@ BLOQUE DE FOTO
 
 
   function send() {
+    console.log("CLICK SEND");
     mainCard.style.display = "none";
     loadingScreen.style.display = "flex";
+    mainCard.style.display = "none";
     document.getElementById("progressBar").style.width = "0%";
     
     loadingText.innerText = "Procesando tu envío... 👽";
     document.getElementById("loadingActions").style.display = "none";
 
     sendBtn && (sendBtn.disabled = true);
-    document.getElementById("sendAudioBtn")?.setAttribute("disabled", true);
+    const audioBtn = document.getElementById("sendAudioBtn");
+    if (audioBtn) audioBtn.setAttribute("disabled", true);
 
     fetch("https://script.google.com/macros/s/AKfycbymto6TIdZTbYgeq3630YAbRG-5tilj0uPpuZfnW04pWJPWoZrZ533jZkPwAVc-X-kTWQ/exec", {
       method: "POST",
@@ -413,8 +416,9 @@ BLOQUE DE FOTO
         image: imageData
       })
     }).then(() => {
-
+      console.log("FETCH OK");
       iniciarLoadingConBarra(() => {
+        console.log("INICIANDO BARRA");
         loadingText.innerHTML = `
           Tus saludos han sido enviados mi marcianin 👽<br><br>
           <a class="whatsapp-btn" target="_blank"
@@ -426,6 +430,7 @@ BLOQUE DE FOTO
         document.getElementById("loadingActions").style.display = "block";
       });
     });
+    console.log("CLICK SEND");
   }
 
   const galleryInput = document.getElementById("galleryInput");
@@ -597,6 +602,7 @@ BLOQUE DE FOTO
     function sendAudio() {
       mainCard.style.display = "none";
       loadingScreen.style.display = "flex";
+      mainCard.style.display = "none";
       document.getElementById("progressBar").style.width = "0%";
       
       loadingText.innerText = "Procesando tu envío... 👽";
@@ -609,7 +615,8 @@ BLOQUE DE FOTO
         const base64Audio = reader.result.split(",")[1];
 
         sendBtn && (sendBtn.disabled = true);
-        document.getElementById("sendAudioBtn")?.setAttribute("disabled", true);
+        const audioBtn = document.getElementById("sendAudioBtn");
+        if (audioBtn) audioBtn.setAttribute("disabled", true);
 
         fetch("https://script.google.com/macros/s/AKfycbymto6TIdZTbYgeq3630YAbRG-5tilj0uPpuZfnW04pWJPWoZrZ533jZkPwAVc-X-kTWQ/exec", {
           method: "POST",
@@ -763,29 +770,34 @@ function enviarConcurso() {
 
 
     /*== FUNCION DE BARRA DE CARGA ==*/
-function iniciarLoadingConBarra(callbackFinal) {
-  const progressBar = document.getElementById("progressBar");
+      function iniciarLoadingConBarra(callbackFinal) {
+        const progressBar = document.getElementById("progressBar");
 
-  let progress = 5;
-  progressBar.style.width = "5%";
-  const duration = 8000; // 8 segundos
-  const intervalTime = 100; // ms
-  const increment = 100 / (duration / intervalTime);
+        if (!progressBar) {
+          console.error("No existe progressBar");
+          return;
+        }
 
-  const interval = setInterval(() => {
-    progress += increment;
+        let progress = 5;
+        progressBar.style.width = "5%";
 
-    if (progress >= 100) {
-      progress = 100;
-      clearInterval(interval);
+        const duration = 8000;
+        const intervalTime = 100;
+        const increment = 100 / (duration / intervalTime);
 
-      // Mostrar resultado final
-      callbackFinal();
-    }
+        const interval = setInterval(() => {
+          progress += increment;
 
-    progressBar.style.width = progress + "%";
-  }, intervalTime);
-}
+          if (progress >= 100) {
+            progress = 100;
+            clearInterval(interval);
+
+            callbackFinal();
+          }
+
+          progressBar.style.width = progress + "%";
+        }, intervalTime);
+      }
 </script>
 
 </body>
