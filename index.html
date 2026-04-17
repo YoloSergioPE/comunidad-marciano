@@ -162,45 +162,57 @@
 /**-- LOADING CSS --*/
 #loadingOverlay {
   position: fixed;
-  top: 0;
-  left: 0;
-  width: 100vw;
-  height: 100vh;
+  inset: 0;
 
   display: none;
   justify-content: center;
   align-items: center;
 
-  background: rgba(0,0,0,0.9);
   z-index: 9999999;
+
+  /* 🔥 SIN fondo negro */
+  background: transparent;
 }
 
 .loaderBox {
   width: 90%;
-  max-width: 320px;
+  max-width: 360px;
   text-align: center;
 }
 
+/* TEXTO */
 #loadingMessage {
-  margin-bottom: 15px;
-  font-size: 1rem;
+  margin-bottom: 18px;
+  font-size: 1.1rem;
+  text-shadow: 0 0 10px rgba(255,255,255,0.3);
 }
 
+/* CONTENEDOR BARRA */
 .loaderBar {
   width: 100%;
-  height: 10px;
-  background: rgba(255,255,255,0.2);
-  border-radius: 10px;
+  height: 14px; /* 🔥 MÁS GRANDE */
+  background: rgba(255,255,255,0.15);
+  border-radius: 20px;
   overflow: hidden;
+  backdrop-filter: blur(6px);
 }
 
+/* PROGRESO */
 #loaderFill {
   width: 0%;
   height: 100%;
-  background: #1f8bff;
+  border-radius: 20px;
+
+  background: linear-gradient(90deg, #1f8bff, #5f9dff, #1f8bff);
+
+  /* 🔥 EFECTO GLOW */
+  box-shadow:
+    0 0 8px #1f8bff,
+    0 0 16px #1f8bff,
+    0 0 24px #5f9dff;
+
   transition: width 0.1s linear;
 }
-
 
   </style>
 </head>
@@ -762,27 +774,41 @@ concursoInput.addEventListener("change", () => {
       let loaderInterval;
 
       function startLoader(callback) {
-      const overlay = document.getElementById("loadingOverlay");
-      const fill = document.getElementById("loaderFill");
+        const overlay = document.getElementById("loadingOverlay");
+        const fill = document.getElementById("loaderFill");
+        const bar = document.querySelector(".loaderBar");
 
-      overlay.style.display = "flex";
-      fill.style.width = "0%";
+        overlay.style.display = "flex";
+        fill.style.width = "0%";
 
-      let progress = 0;
+        let progress = 0;
 
-      loaderInterval = setInterval(() => {
-        progress += 1.25; // ~8 segundos
+        loaderInterval = setInterval(() => {
+          progress += 1.25;
 
-        if (progress >= 100) {
-          progress = 100;
-          clearInterval(loaderInterval);
+          if (progress >= 100) {
+            progress = 100;
+            fill.style.width = "100%";
 
-          callback();
-        }
+            clearInterval(loaderInterval);
 
-        fill.style.width = progress + "%";
-      }, 100);
-    }
+            // 🔥 ESPERA PEQUEÑA PARA EFECTO FINAL
+            setTimeout(() => {
+
+              // 🔥 OCULTA LA BARRA
+              if (bar) bar.style.display = "none";
+
+              callback();
+
+            }, 300);
+
+            return;
+          }
+
+          fill.style.width = progress + "%";
+
+        }, 100);
+      }
     
   </script>
 
