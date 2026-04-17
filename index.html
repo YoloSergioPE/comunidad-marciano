@@ -172,8 +172,7 @@
   align-items: center;
 
   background: rgba(0,0,0,0.9);
-  z-index: 99999;
-  isolation: isolate;
+  z-index: 9999999;
 }
 
 .loaderBox {
@@ -303,17 +302,16 @@
 
         <div id="concursoStatus"></div>
       </div> 
-
-<!-- CONTENIDO LOADING GLOBAL -->
-    <div id="loadingOverlay">
-      <div class="loaderBox">
-        <p id="loadingMessage">Procesando... 👽</p>
-        <div class="loaderBar">
-          <div id="loaderFill"></div>
+  </div>
+  <!-- CONTENIDO LOADING GLOBAL -->
+      <div id="loadingOverlay">
+        <div class="loaderBox">
+          <p id="loadingMessage">Procesando... 👽</p>
+          <div class="loaderBar">
+            <div id="loaderFill"></div>
+          </div>
         </div>
       </div>
-    </div>
-
   <script>
   const video = document.getElementById("video");
   const canvas = document.getElementById("canvas");
