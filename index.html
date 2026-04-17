@@ -23,7 +23,7 @@
       background:
         linear-gradient(rgba(0,0,0,0.65), rgba(0,0,0,0.85)),
         url("assets/fondo.jpg") center / cover no-repeat fixed;
-      display: relative;
+      display: flex;
       align-items: center;
       justify-content: center;
       color: #fff;
@@ -132,9 +132,17 @@
       padding: 20px;
     }
 
+    .loading-box {
+      width: 100%;
+      max-width: 320px;
+    }
     .loading-box h2 {
       font-size: 1.4rem;
       margin-bottom: 10px;
+      min-height: 48px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
     }
 
     .whatsapp-btn {
