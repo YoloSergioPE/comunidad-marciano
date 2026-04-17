@@ -256,26 +256,56 @@
   margin: 8px 0 6px;
 }
 
-/* Imagen de referencia */
+/* INPUT GROUP */
+.inputGroup {
+  text-align: left;
+  margin-bottom: 10px;
+}
+
+.inputGroup label {
+  font-size: 0.8rem;
+  opacity: 0.8;
+  margin-bottom: 4px;
+  display: block;
+}
+
+/* HELPER */
+.helperText {
+  font-size: 0.85rem;
+  opacity: 0.8;
+  margin-bottom: 10px;
+}
+
+/* CONTENEDOR UPLOAD */
+.uploadBox {
+  background: rgba(255,255,255,0.05);
+  padding: 12px;
+  border-radius: 14px;
+  margin-bottom: 15px;
+}
+
+/* IMAGEN REFERENCIA */
 .referenciaImg {
   width: 100%;
   max-height: 180px;
   object-fit: contain;
   border-radius: 10px;
-  margin-bottom: 10px;
-  opacity: 0.85;
+  margin-top: 10px;
+  opacity: 0.9;
 }
 
-/* Preview usuario (más destacado) */
+/* PREVIEW */
 #concursoPreview {
   width: 100%;
-  max-height: 200px;
+  max-height: 180px;
   object-fit: contain;
-  border-radius: 12px;
+  border-radius: 10px;
   margin-top: 10px;
-  background: rgba(0,0,0,0.4);
-  padding: 6px;
-  border: 2px solid rgba(95,157,255,0.6);
+}
+
+/* BOTÓN CAMBIAR */
+#reuploadBtn {
+  margin-top: 8px;
 }
   </style>
 </head>
@@ -358,39 +388,64 @@
 
       <!-- CONTENIDO CONCURSO -->
       <div id="concursoContent" style="display:none;">
+
         <h2>Participa en el sorteo KIA 🚗</h2>
 
-        <input id="concursoNombre" placeholder="Nombre completo">
-        <input id="concursoCelular" placeholder="Número de celular">
+        <!-- INPUTS CON LABEL -->
+        <div class="inputGroup">
+          <label>Tu nombre completo</label>
+          <input id="concursoNombre" placeholder="Ej: Sergio Pérez">
+        </div>
 
-        <!-- 🔥 REFERENCIA -->
-        <p class="helperText">Ejemplo de la captura que debes subir 👇</p>
+        <div class="inputGroup">
+          <label>Número de WhatsApp</label>
+          <input id="concursoCelular" placeholder="Ej: 987654321">
+        </div>
 
-        <img src="assets/imgKIA.png" class="referenciaImg">
+        <!-- REFERENCIA + BOTÓN -->
+        <div class="uploadBox">
 
-        <!-- INPUT REAL -->
-        <input 
-          type="file" 
-          id="concursoFoto" 
-          accept="image/*"
-        >
+          <p class="helperText">
+            Sube una captura como esta 👇
+          </p>
 
-        <!-- PREVIEW USUARIO -->
-        <img id="concursoPreview" class="preview" style="display:none;" />
+          <!-- BOTÓN BONITO -->
+          <button class="secondary" onclick="abrirInputConcurso()">
+            📤 Subir imagen
+          </button>
 
-        <button 
-          class="secondary" 
-          onclick="reemplazarImagen()" 
-          id="reuploadBtn"
-          style="display:none;">
-          Cambiar imagen
-        </button>
+          <!-- INPUT OCULTO -->
+          <input 
+            type="file" 
+            id="concursoFoto" 
+            accept="image/*"
+            style="display:none;"
+          >
 
+          <!-- IMAGEN REFERENCIA -->
+          <img src="assets/imgKIA.png" class="referenciaImg">
+
+          <!-- PREVIEW -->
+          <img id="concursoPreview" class="preview" style="display:none;" />
+
+          <!-- BOTÓN CAMBIAR -->
+          <button 
+            class="secondary" 
+            onclick="reemplazarImagen()" 
+            id="reuploadBtn"
+            style="display:none;">
+            🔁 Cambiar imagen
+          </button>
+
+        </div>
+
+        <!-- CTA -->
         <button onclick="enviarConcurso()" id="concursoBtn">
           Enviar participación
         </button>
 
         <div id="concursoStatus"></div>
+
       </div>
   </div>
   <!-- CONTENIDO LOADING GLOBAL -->
@@ -639,6 +694,7 @@
         });
     }
 
+/* =========================================================================== */
 
     const iosAudioInput = document.getElementById("iosAudioInput");
 
@@ -744,6 +800,7 @@
       reader.readAsDataURL(audioBlob);
     }
 
+/* =========================================================================== */
 
 /*== FUNCION de KIA CONCURSO ==*/
 let concursoImage = null;
@@ -835,6 +892,16 @@ const concursoPreview = document.getElementById("concursoPreview");
       document.getElementById("concursoFoto").click();
     }
 
+    function abrirInputConcurso() {
+      document.getElementById("concursoFoto").click();
+    }
+
+    function reemplazarImagen() {
+      document.getElementById("concursoFoto").click();
+    }
+
+/* =========================================================================== */
+
     function resetApp() {
       loadingScreen.style.display = "none";
       mainCard.style.display = "block";
@@ -882,6 +949,9 @@ const concursoPreview = document.getElementById("concursoPreview");
       document.getElementById("subtitle").innerText =
         "Elige cómo quieres enviar tu saludo";
     }
+
+
+/* =========================================================================== */
 
       /* FUNCION LOADING*/
       let loaderInterval;
