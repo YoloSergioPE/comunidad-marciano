@@ -119,32 +119,6 @@
       color: #aee0ff;
     }
 
-    /* LOADING */
-    #loadingScreen {
-      position: fixed;
-      inset: 0;
-      background: linear-gradient(rgba(0,0,0,0.85), rgba(0,0,0,0.95));
-      display: none;
-      align-items: center;
-      justify-content: center;
-      z-index: 999;
-      text-align: center;
-      padding: 20px;
-    }
-
-    .loading-box {
-      width: 100%;
-      max-width: 320px;
-    }
-    .loading-box h2 {
-      font-size: 1.4rem;
-      margin-bottom: 10px;
-      min-height: 48px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-
     .whatsapp-btn {
       display: inline-block;
       margin-top: 20px;
@@ -181,46 +155,55 @@
       100% { transform: scale(1); opacity: 1; }
     }
 
-/*== ESTILOS DE BARRA DE CARGA ==*/
-#progressContainer {
-  width: 100%;
-  height: 10px;
-  background: rgba(255,255,255,0.15);
-  border-radius: 10px;
-  overflow: hidden;
-}
 
-#progressBar {
-  width: 0%;
-  height: 100%;
-  background: linear-gradient(90deg, #1f8bff, #5f9dff);
-  transition: width 0.2s linear;
-}
 
-#loadingScreen {
-  background: red !important;
 
+/**-- LOADING CSS --*/
+#loadingOverlay {
   position: fixed;
   top: 0;
   left: 0;
   width: 100%;
   height: 100%;
-  
+  background: rgba(0,0,0,0.85);
   display: none;
-
-  align-items: center;
   justify-content: center;
-
-  z-index: 9999; /* 🔥 MÁS ALTO */
+  align-items: center;
+  z-index: 9999;
 }
+
+.loaderBox {
+  width: 90%;
+  max-width: 320px;
+  text-align: center;
+}
+
+#loadingMessage {
+  margin-bottom: 15px;
+  font-size: 1rem;
+}
+
+.loaderBar {
+  width: 100%;
+  height: 10px;
+  background: rgba(255,255,255,0.2);
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+#loaderFill {
+  width: 0%;
+  height: 100%;
+  background: #1f8bff;
+  transition: width 0.1s linear;
+}
+
+
   </style>
 </head>
 
 <body>
 
-<!-- 
-BLOQUE DE FOTO 
--->
   <div class="card" id="mainCard">
     <img src="assets/logo.png" class="logo" alt="El Marciano">
     <h1>Saluda al Marciano</h1>
@@ -317,27 +300,17 @@ BLOQUE DE FOTO
         <div id="concursoStatus"></div>
       </div> 
 
-
-<!-- LOADING GLOBAL -->
-<div id="loadingScreen">
-  <div class="loading-box">
-    <h2 id="loadingText"></h2>
-
-    <!-- PROGRESS BAR -->
-    <div id="progressContainer" style="margin-top:15px;">
-      <div id="progressBar"></div>
+<!-- CONTENIDO LOADING GLOBAL -->
+    <div id="loadingOverlay">
+      <div class="loaderBox">
+        <p id="loadingMessage">Procesando... 👽</p>
+        <div class="loaderBar">
+          <div id="loaderFill"></div>
+        </div>
+      </div>
     </div>
 
-    <div id="loadingActions" style="display:none;">
-      <button class="secondary" onclick="resetApp()">
-        Volver al inicio
-      </button>
-    </div>
-  </div>
-</div>
-
-
-<script>
+  <script>
   const video = document.getElementById("video");
   const canvas = document.getElementById("canvas");
   const preview = document.getElementById("photoPreview");
@@ -440,8 +413,6 @@ BLOQUE DE FOTO
         image: imageData
       })
     }).then(() => {
-      console.log("FETCH OK");
-      iniciarLoadingConBarra(() => {
         console.log("INICIANDO BARRA");
         loadingText.innerHTML = `
           Tus saludos han sido enviados mi marcianin 👽<br><br>
@@ -452,7 +423,7 @@ BLOQUE DE FOTO
         `;
 
         document.getElementById("loadingActions").style.display = "block";
-      });
+      
     });
     console.log("CLICK SEND");
   }
@@ -650,7 +621,6 @@ BLOQUE DE FOTO
             audio: base64Audio
           })
         }).then(() => {
-          iniciarLoadingConBarra(() => {
             loadingText.innerHTML = `
               Tus saludos han sido enviados mi marcianin 👽<br><br>
               <a class="whatsapp-btn" target="_blank"
@@ -660,8 +630,6 @@ BLOQUE DE FOTO
             `;
 
             document.getElementById("loadingActions").style.display = "block";
-          });
-
         });
       };
 
@@ -694,61 +662,50 @@ concursoInput.addEventListener("change", () => {
   reader.readAsDataURL(file);
 });
 
-function enviarConcurso() {
-  const nombre = document.getElementById("concursoNombre").value.trim();
-  const celular = document.getElementById("concursoCelular").value.trim();
 
-  if (!nombre || !celular || !concursoImage) {
-    alert("Completa todos los campos");
-    return;
-  }
+    /*======= ENVIAR CONCURSO ==========*/
+    function enviarConcurso() {
+      const nombre = document.getElementById("concursoNombre").value.trim();
+      const celular = document.getElementById("concursoCelular").value.trim();
 
-  if (celular.length < 9) {
-    alert("Número inválido");
-    return;
-  }
+      if (!nombre || !celular || !concursoImage) {
+        alert("Completa todos los campos");
+        return;
+      }
 
-  // ================= UI LOADING =================
-  mainCard.style.display = "none";
-  loadingScreen.style.display = "flex";
-  loadingScreen.offsetHeight;
-  document.getElementById("progressBar").style.width = "0%";
+      if (celular.length < 9) {
+        alert("Número inválido");
+        return;
+      }
 
-  loadingText.innerText = "Procesando tu envío... 👽";
-  document.getElementById("loadingActions").style.display = "none";
+      // 🔥 ocultar UI
+      mainCard.style.display = "none";
 
-  // ================= BARRA (INDEPENDIENTE) =================
-  iniciarLoadingConBarra(() => {
-    loadingText.innerHTML = `
-      👽 Tu participación fue enviada<br><br>
-      <a class="whatsapp-btn" target="_blank"
-        href="https://chat.whatsapp.com/IviDOt7pRjbCywAfzSFe6d">
-        Unirme a la comunidad 🚀
-      </a>
-    `;
+      // 🔥 iniciar loader (independiente del fetch)
+      startLoader(() => {
+        document.getElementById("loadingMessage").innerHTML = `
+          👽 Participación enviada<br><br>
+          <a class="whatsapp-btn" target="_blank"
+            href="https://chat.whatsapp.com/IviDOt7pRjbCywAfzSFe6d">
+            Unirme 🚀
+          </a>
+        `;
+      });
 
-    document.getElementById("loadingActions").style.display = "block";
-  });
-
-  // ================= FETCH EN PARALELO =================
-  fetch("https://script.google.com/macros/s/AKfycbymto6TIdZTbYgeq3630YAbRG-5tilj0uPpuZfnW04pWJPWoZrZ533jZkPwAVc-X-kTWQ/exec", {
-    method: "POST",
-    headers: { "Content-Type": "text/plain;charset=utf-8" },
-    body: JSON.stringify({
-      type: "concurso",
-      nombre: nombre,
-      celular: celular,
-      imagen: concursoImage
-    })
-  })
-  .then(() => {
-    console.log("FETCH OK (concurso)");
-  })
-  .catch((err) => {
-    console.error("FETCH ERROR (concurso):", err);
-    // 👉 No rompemos UX, la barra sigue normal
-  });
-}
+      // 🔥 enviar en paralelo
+      fetch("https://script.google.com/macros/s/AKfycbymto6TIdZTbYgeq3630YAbRG-5tilj0uPpuZfnW04pWJPWoZrZ533jZkPwAVc-X-kTWQ/exec", {
+        method: "POST",
+        headers: { "Content-Type": "text/plain;charset=utf-8" },
+        body: JSON.stringify({
+          type: "concurso",
+          nombre: nombre,
+          celular: celular,
+          imagen: concursoImage
+        })
+      })
+      .then(() => console.log("FETCH OK"))
+      .catch(err => console.error("FETCH ERROR:", err));
+    }
 
 
     function resetApp() {
@@ -799,50 +756,33 @@ function enviarConcurso() {
         "Elige cómo quieres enviar tu saludo";
     }
 
+      /* FUNCION LOADING*/
+      let loaderInterval;
 
+      function startLoader(callback) {
+      const overlay = document.getElementById("loadingOverlay");
+      const fill = document.getElementById("loaderFill");
 
-    /*== FUNCION DE BARRA DE CARGA ==*/
-      let loadingInterval = null;
+      overlay.style.display = "flex";
+      fill.style.width = "0%";
 
-      function iniciarLoadingConBarra(callbackFinal) {
-        const progressBar = document.getElementById("progressBar");
+      let progress = 0;
 
-        if (!progressBar) {
-          console.error("No existe progressBar");
-          return;
+      loaderInterval = setInterval(() => {
+        progress += 1.25; // ~8 segundos
+
+        if (progress >= 100) {
+          progress = 100;
+          clearInterval(loaderInterval);
+
+          callback();
         }
 
-        // 🔥 LIMPIA cualquier intervalo previo
-        if (loadingInterval) {
-          clearInterval(loadingInterval);
-        }
-
-        let progress = 0;
-        progressBar.style.width = "0%";
-
-        const duration = 8000; // 8 segundos
-        const steps = 80; // 8000 / 100ms
-        const increment = 100 / steps;
-
-        loadingInterval = setInterval(() => {
-          progress += increment;
-
-          if (progress >= 100) {
-            progress = 100;
-            progressBar.style.width = "100%";
-
-            clearInterval(loadingInterval);
-            loadingInterval = null;
-
-            console.log("BARRA TERMINADA");
-            callbackFinal();
-            return;
-          }
-
-          progressBar.style.width = progress + "%";
-        }, 100);
-      }
-</script>
+        fill.style.width = progress + "%";
+      }, 100);
+    }
+    
+  </script>
 
 </body>
 </html>
