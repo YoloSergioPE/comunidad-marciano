@@ -1,1002 +1,289 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8" />
-  <title>Saluda al Marciano</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-
-  <!-- Google Analytics -->
-  <script async src="https://www.googletagmanager.com/gtag/js?id=G-PR96WYMZ01"></script>
-  <script>
-    window.dataLayer = window.dataLayer || [];
-    function gtag(){dataLayer.push(arguments);}
-    gtag('js', new Date());
-    gtag('config', 'G-PR96WYMZ01');
-  </script>
-  <style>
-    * { box-sizing: border-box; }
-
-    body {
-      margin: 0;
-      min-height: 100vh;
-      font-family: 'Segoe UI', Arial, sans-serif;
-      background:
-        linear-gradient(rgba(0,0,0,0.65), rgba(0,0,0,0.85)),
-        url("assets/fondo.jpg") center / cover no-repeat fixed;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      color: #fff;
-      padding: 20px;
-      position: relative;
-    }
-
-    .card {
-      width: 100%;
-      max-width: 420px;
-      background: linear-gradient(
-        180deg,
-        rgba(255,255,255,0.08),
-        rgba(255,255,255,0.02)
-      );
-      backdrop-filter: blur(14px);
-      -webkit-backdrop-filter: blur(14px);
-      border-radius: 18px;
-      padding: 24px 20px 26px;
-      border: 1px solid rgba(255,255,255,0.12);
-      box-shadow:
-        0 20px 40px rgba(0,0,0,0.55),
-        inset 0 0 0 1px rgba(255,255,255,0.03);
-      text-align: center;
-    }
-
-    .logo {
-      width: 90px;
-      margin: 0 auto 10px;
-      border-radius: 18px;
-    }
-
-    h1 {
-      font-size: 1.6rem;
-      margin: 6px 0 4px;
-    }
-
-    .subtitle {
-      font-size: 0.95rem;
-      color: #cfd3ff;
-      margin-bottom: 18px;
-    }
-
-    input, textarea {
-      width: 100%;
-      border-radius: 10px;
-      border: none;
-      padding: 12px 14px;
-      margin-bottom: 10px;
-      font-size: 0.95rem;
-      background: rgba(255,255,255,0.95);
-    }
-
-    textarea {
-      resize: none;
-      min-height: 70px;
-    }
-
-    video, img.preview {
-      width: 100%;
-      border-radius: 14px;
-      margin: 12px 0;
-      background: #000;
-    }
-
-    button {
-      width: 100%;
-      padding: 13px;
-      border-radius: 12px;
-      border: none;
-      font-size: 1rem;
-      font-weight: 600;
-      cursor: pointer;
-      margin-top: 8px;
-      background: linear-gradient(135deg, #1f8bff, #5f9dff);
-      color: #fff;
-      box-shadow: 0 8px 18px rgba(31,139,255,0.35);
-    }
-
-    button:disabled {
-      background: #555;
-      box-shadow: none;
-      cursor: not-allowed;
-    }
-
-    .secondary {
-      background: linear-gradient(135deg, #2b2b38, #3a3a4f);
-    }
-
-    #status {
-      margin-top: 12px;
-      font-size: 0.9rem;
-      min-height: 18px;
-      color: #aee0ff;
-    }
-
-    .whatsapp-btn {
-      display: inline-block;
-      margin-top: 20px;
-      padding: 12px 20px;
-      border-radius: 12px;
-      text-decoration: none;
-      font-weight: 600;
-      color: #fff;
-      background: linear-gradient(135deg, #25D366, #1ebe5d);
-    }
-
-    #recordingIndicator {
-      display: none;
-      align-items: center;
-      justify-content: center;
-      margin: 12px 0;
-      font-weight: 600;
-      color: #ff5c5c;
-    }
-
-
-    .rec-dot {
-      width: 12px;
-      height: 12px;
-      background: #ff3b3b;
-      border-radius: 50%;
-      margin-right: 8px;
-      animation: pulse 1s infinite;
-    }
-
-    @keyframes pulse {
-      0% { transform: scale(1); opacity: 1; }
-      50% { transform: scale(1.6); opacity: 0.6; }
-      100% { transform: scale(1); opacity: 1; }
-    }
-
-
-
-
-/**-- LOADING CSS --*/
-#loadingOverlay {
-  position: fixed;
-  inset: 0;
-
-  display: none;
-  justify-content: center;
-  align-items: center;
-
-  z-index: 9999999;
-
-  /* 🔥 SIN fondo negro */
-  background: transparent;
-}
-
-.loaderBox {
-  width: 90%;
-  max-width: 360px;
-  text-align: center;
-}
-
-/* TEXTO */
-#loadingMessage {
-  margin-bottom: 18px;
-  font-size: 1.1rem;
-  text-shadow: 0 0 10px rgba(255,255,255,0.3);
-}
-
-/* CONTENEDOR BARRA */
-.loaderBar {
-  width: 100%;
-  height: 14px; /* 🔥 MÁS GRANDE */
-  background: rgba(255,255,255,0.15);
-  border-radius: 20px;
-  overflow: hidden;
-  backdrop-filter: blur(6px);
-}
-
-/* PROGRESO */
-#loaderFill {
-  width: 0%;
-  height: 100%;
-  border-radius: 20px;
-
-  background: linear-gradient(90deg, #1f8bff, #5f9dff, #1f8bff);
-
-  /* 🔥 EFECTO GLOW */
-  box-shadow:
-    0 0 8px #1f8bff,
-    0 0 16px #1f8bff,
-    0 0 24px #5f9dff;
-
-  transition: width 0.1s linear;
-}
-
-
-/* CARD MENSAJE FINAL */
-
-.finalCard {
-  width: 100%;
-  max-width: 320px;
-  padding: 20px;
-  border-radius: 18px;
-
-  background: rgba(0,0,0,0.5);
-  backdrop-filter: blur(12px);
-
-  border: 1px solid rgba(255,255,255,0.15);
-
-  box-shadow: 0 10px 30px rgba(0,0,0,0.6);
-}
-
-.finalLogo {
-  width: 70px;
-  margin-bottom: 10px;
-  border-radius: 14px;
-}
-
-.finalText {
-  font-size: 0.95rem;
-  margin-bottom: 15px;
-  color: #cfd3ff;
-}
-
-.finalFooter {
-  margin-top: 18px;
-  font-size: 0.8rem;
-  opacity: 0.7;
-}
-
-/* CSS para Img Referencia */
-.helperText {
-  font-size: 0.8rem;
-  opacity: 0.7;
-  margin: 8px 0 6px;
-}
-
-/* INPUT GROUP */
-.inputGroup {
-  text-align: left;
-  margin-bottom: 10px;
-}
-
-.inputGroup label {
-  font-size: 0.8rem;
-  opacity: 0.8;
-  margin-bottom: 4px;
-  display: block;
-}
-
-/* HELPER */
-.helperText {
-  font-size: 0.85rem;
-  opacity: 0.8;
-  margin-bottom: 10px;
-}
-
-/* CONTENEDOR UPLOAD */
-.uploadBox {
-  background: rgba(255,255,255,0.05);
-  padding: 12px;
-  border-radius: 14px;
-  margin-bottom: 15px;
-}
-
-/* IMAGEN REFERENCIA */
-.referenciaImg {
-  width: 100%;
-  max-height: 180px;
-  object-fit: contain;
-  border-radius: 10px;
-  margin-top: 10px;
-  opacity: 0.9;
-}
-
-/* PREVIEW */
-#concursoPreview {
-  width: 100%;
-  max-height: 180px;
-  object-fit: contain;
-  border-radius: 10px;
-  margin-top: 10px;
-}
-
-/* BOTÓN CAMBIAR */
-#reuploadBtn {
-  margin-top: 8px;
-}
-  </style>
+<meta charset="UTF-8">
+<title>Saluda al Marciano 👽</title>
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<meta name="description" content="Envía tu saludo al Marciano durante nuestras transmisiones. 👽🎉">
+<meta name="theme-color" content="#0b1220">
+<meta property="og:title" content="Saluda al Marciano 👽">
+<meta property="og:description" content="Envía tu saludo al Marciano durante nuestras transmisiones. 👽🎉">
+<meta property="og:image" content="assets/logo.png">
+<meta property="og:type" content="website">
+<link rel="icon" type="image/png" href="assets/favicon.png">
+<link rel="apple-touch-icon" href="assets/favicon.png">
+<!-- Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-PR96WYMZ01"></script>
+<script>
+window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments)}gtag('js',new Date());gtag('config','G-PR96WYMZ01');
+</script>
+<style>
+*{box-sizing:border-box}
+body{margin:0;min-height:100vh;font-family:'Segoe UI',Arial,sans-serif;background:linear-gradient(rgba(0,0,0,.65),rgba(0,0,0,.85)),url("assets/fondo.jpg") center/cover no-repeat fixed;display:flex;align-items:center;justify-content:center;color:#fff;padding:20px;position:relative}
+.card{width:100%;max-width:420px;background:linear-gradient(180deg,rgba(255,255,255,.08),rgba(255,255,255,.02));backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border-radius:18px;padding:24px 20px 26px;border:1px solid rgba(255,255,255,.12);box-shadow:0 20px 40px rgba(0,0,0,.55),inset 0 0 0 1px rgba(255,255,255,.03);text-align:center}
+.logo{width:90px;margin:0 auto 10px;border-radius:18px}
+h1{font-size:1.6rem;margin:6px 0 4px}
+.subtitle{font-size:.95rem;color:#cfd3ff;margin-bottom:18px}
+input,textarea{width:100%;border-radius:10px;border:none;padding:12px 14px;margin-bottom:10px;font-size:.95rem;background:rgba(255,255,255,.95)}
+textarea{resize:none;min-height:70px}
+video,img.preview{width:100%;border-radius:14px;margin:12px 0;background:#000}
+button{width:100%;padding:13px;border-radius:12px;border:none;font-size:1rem;font-weight:600;cursor:pointer;margin-top:8px;background:linear-gradient(135deg,#1f8bff,#5f9dff);color:#fff;box-shadow:0 8px 18px rgba(31,139,255,.35)}
+button:disabled{background:#555;box-shadow:none;cursor:not-allowed}
+.secondary{background:linear-gradient(135deg,#2b2b38,#3a3a4f)}
+#status,#audioStatus,#concursoStatus{margin-top:12px;font-size:.9rem;min-height:18px;color:#aee0ff}
+.whatsapp-btn{display:inline-block;margin-top:20px;padding:12px 20px;border-radius:12px;text-decoration:none;font-weight:600;color:#fff;background:linear-gradient(135deg,#25D366,#1ebe5d)}
+#recordingIndicator{display:none;align-items:center;justify-content:center;margin:12px 0;font-weight:600;color:#ff5c5c}
+.rec-dot{width:12px;height:12px;background:#ff3b3b;border-radius:50%;margin-right:8px;animation:pulse 1s infinite}
+@keyframes pulse{0%{transform:scale(1);opacity:1}50%{transform:scale(1.6);opacity:.6}100%{transform:scale(1);opacity:1}}
+#loadingOverlay{position:fixed;inset:0;display:none;justify-content:center;align-items:center;z-index:9999999;background:rgba(0,0,0,.25);backdrop-filter:blur(3px);-webkit-backdrop-filter:blur(3px)}
+.loaderBox{width:90%;max-width:360px;text-align:center}
+#loadingMessage{margin-bottom:18px;font-size:1.1rem;text-shadow:0 0 10px rgba(255,255,255,.3)}
+.loaderBar{width:100%;height:14px;background:rgba(255,255,255,.15);border-radius:20px;overflow:hidden;backdrop-filter:blur(6px)}
+#loaderFill{width:0;height:100%;border-radius:20px;background:linear-gradient(90deg,#1f8bff,#5f9dff,#1f8bff);box-shadow:0 0 8px #1f8bff,0 0 16px #1f8bff,0 0 24px #5f9dff;transition:width .1s linear}
+.finalCard{width:100%;max-width:320px;padding:20px;border-radius:18px;background:rgba(0,0,0,.5);backdrop-filter:blur(12px);border:1px solid rgba(255,255,255,.15);box-shadow:0 10px 30px rgba(0,0,0,.6)}
+.finalLogo{width:70px;margin-bottom:10px;border-radius:14px}
+.finalText{font-size:.95rem;margin-bottom:15px;color:#cfd3ff}
+.finalFooter{margin-top:18px;font-size:.8rem;opacity:.7}
+.helperText{font-size:.85rem;opacity:.8;margin-bottom:10px}
+.inputGroup{text-align:left;margin-bottom:10px}
+.inputGroup label{font-size:.8rem;opacity:.8;margin-bottom:4px;display:block}
+.uploadBox{background:rgba(255,255,255,.05);padding:12px;border-radius:14px;margin-bottom:15px}
+.referenciaImg{width:100%;max-height:180px;object-fit:contain;border-radius:10px;margin-top:10px;opacity:.9}
+#concursoPreview{width:100%;max-height:180px;object-fit:contain;border-radius:10px;margin-top:10px}
+#reuploadBtn{margin-top:8px}
+</style>
 </head>
-
 <body>
-
-  <div class="card" id="mainCard">
-    <img src="assets/logo.png" class="logo" alt="El Marciano">
-    <h1> Saluda al Marciano 👽</h1>
-    <p class="subtitle" id="subtitle">
-      ¡Manda tus saludos a los marcianos y al panel! 🎉
-    </p>
-
-
-    <!-- SELECTOR -->
-    <div id="modeSelector">
-      <br><button onclick="selectMode('photo')">📸 Envía tu foto</button>
-      <button onclick="selectMode('audio')">🎙️ Envía tu audio</button> 
-      <br>
-      <!--<button onclick="selectMode('concurso')">🚗 Concurso KIA</button>-->
-    </div>
-
-    <!-- CONTENIDO FOTO -->
-    <div id="photoContent" style="display:none;">
-      <input id="name" placeholder="Tu nombre / de donde nos ves">
-        <textarea id="message" placeholder="Tu mensaje para El Marciano"></textarea>
-
-        <video id="video" autoplay playsinline></video>
-        <img id="photoPreview" class="preview" style="display:none;" />
-
-        <canvas id="canvas" style="display:none;"></canvas>
-        <input 
-          type="file" 
-          id="galleryInput" 
-          accept="image/*"
-          style="display:none;"
-        >
-        <button class="secondary" onclick="switchCamera()" id="switchBtn">Cambiar cámara</button>
-        <button onclick="takePhoto()" id="takeBtn">Tomar foto</button>
-        <button class="secondary" onclick="openGallery()" id="galleryBtn">
-          Subir desde galería
-        </button>
-
-        <button onclick="retakePhoto()" id="retakeBtn" style="display:none;">Hacer nueva foto</button>
-        <button onclick="send()" id="sendBtn" style="display:none;">Enviar saludo</button>
-
-        <div id="status"></div>
-      </div>
-
-
-      <!-- CONTENIDO AUDIO -->
-    <div id="audioContent" style="display:none;">
-          <input id="audioName" placeholder="Tu nombre / de donde nos ves">
-
-          <input 
-            type="file"
-            id="iosAudioInput"
-            accept="audio/*"
-            capture
-            style="display:none;"
-          >
-
-          <button onclick="startRecording()">🎙️ Grabar audio</button>
-          <button onclick="stopRecording()" disabled id="stopBtn">⏹️ Detener</button>
-
-          <audio id="audioPreview" controls style="display:none;"></audio>
-
-          <button onclick="sendAudio()" id="sendAudioBtn" style="display:none;">
-            Enviar audio
-          </button>
-          <div id="recordingIndicator" style="display:none;">
-            <div class="rec-dot"></div>
-            <span>Grabando audio...</span>
-          </div>
-          <div id="audioStatus"></div>
-    </div>
-
-
-      <!-- CONTENIDO CONCURSO -->
-      <div id="concursoContent" style="display:none;">
-
-        <h2>Participa en el sorteo KIA 🚗</h2>
-
-        <!-- INPUTS CON LABEL -->
-        <div class="inputGroup">
-          <label>Tu nombre completo</label>
-          <input id="concursoNombre" placeholder="Ej: Marciano Lujan Carrion">
-        </div>
-
-        <div class="inputGroup">
-          <label>Número de WhatsApp</label>
-          <input id="concursoCelular" placeholder="Ej: 987654321">
-          <label>📌Nota: Si eres ganador, nos comunicaremos a este número mediante WhatsApp</label>
-        </div>
-
-        <!-- REFERENCIA + BOTÓN -->
-        <div class="uploadBox">
-
-          <!-- BOTÓN BONITO -->
-          <button class="secondary" onclick="abrirInputConcurso()">
-            📤 Subir imagen
-          </button>
-
-          <p class="helperText">
-            Sube una captura como esta 👇
-          </p>
-
-          <!-- INPUT OCULTO -->
-          <input 
-            type="file" 
-            id="concursoFoto" 
-            accept="image/*"
-            style="display:none;"
-          >
-
-          <!-- IMAGEN REFERENCIA -->
-          <img src="assets/imgKIA.png" class="referenciaImg">
-
-          <!-- PREVIEW -->
-          <img id="concursoPreview" class="preview" style="display:none;" />
-
-          <!-- BOTÓN CAMBIAR -->
-          <button 
-            class="secondary" 
-            onclick="reemplazarImagen()" 
-            id="reuploadBtn"
-            style="display:none;">
-            🔁 Cambiar imagen
-          </button>
-
-        </div>
-
-        <!-- CTA -->
-        <button onclick="enviarConcurso()" id="concursoBtn">
-          Enviar participación
-        </button>
-
-        <div id="concursoStatus"></div>
-
-      </div>
-  </div>
-  <!-- CONTENIDO LOADING GLOBAL -->
-      <div id="loadingOverlay">
-        <div class="loaderBox">
-          <p id="loadingMessage">Procesando... 👽</p>
-          <div class="loaderBar">
-            <div id="loaderFill"></div>
-          </div>
-        </div>
-      </div>
-  <script>
-  const video = document.getElementById("video");
-  const canvas = document.getElementById("canvas");
-  const preview = document.getElementById("photoPreview");
-  const statusText = document.getElementById("status");
-
-  const takeBtn = document.getElementById("takeBtn");
-  const retakeBtn = document.getElementById("retakeBtn");
-  const sendBtn = document.getElementById("sendBtn");
-  const switchBtn = document.getElementById("switchBtn");
-  const sendAudioBtn = document.getElementById("sendAudioBtn");
-
-  const loadingScreen = document.getElementById("loadingScreen");
-  const loadingText = document.getElementById("loadingText");
-  const mainCard = document.getElementById("mainCard");
-  const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
-
-  let imageData = null;
-  let currentFacing = "user";
-  let stream = null;
-
-
-  function startCamera() {
-    if (stream) stream.getTracks().forEach(t => t.stop());
-
-    navigator.mediaDevices.getUserMedia({
-      video: { facingMode: currentFacing, width:{ideal:1280}, height:{ideal:720} }
-    }).then(s => {
-      stream = s;
-      video.srcObject = stream;
-    });
-  }
-
-  function switchCamera() {
-    currentFacing = currentFacing === "user" ? "environment" : "user";
-    startCamera();
-  }
-
-  function takePhoto() {
-    canvas.width = video.videoWidth;
-    canvas.height = video.videoHeight;
-    canvas.getContext("2d").drawImage(video, 0, 0);
-
-    imageData = canvas.toDataURL("image/jpeg", 0.9).split(",")[1];
-    preview.src = "data:image/jpeg;base64," + imageData;
-
-    video.style.display = "none";
-    preview.style.display = "block";
-
-    takeBtn.style.display = "none";
-    switchBtn.style.display = "none";
-    retakeBtn.style.display = "block";
-    sendBtn.style.display = "block";
-    sendBtn.disabled = false;
-
-
-
-    statusText.innerText = "¿Te gusta la foto?";    
-  }
-
-  function retakePhoto() {
-    imageData = null;
-
-    preview.style.display = "none";
-    video.style.display = "block";
-
-    takeBtn.style.display = "block";
-    switchBtn.style.display = "block";
-    document.getElementById("galleryBtn").style.display = "block";
-
-    retakeBtn.style.display = "none";
-    sendBtn.style.display = "none";
-    galleryInput.value = "";
-    statusText.innerText = "";
-    sendBtn.disabled = false;
-
-  }
-
-
-  function send() {
-      console.log("CLICK SEND");
-
-      const name = document.getElementById("name").value.trim();
-      const message = document.getElementById("message").value.trim();
-
-      if (!imageData) {
-        alert("Debes tomar o subir una foto");
-        return;
-      }
-
-      // 🔥 ocultar UI
-      mainCard.style.display = "none";
-
-      // 🔥 iniciar loader (independiente del fetch)
-      startLoader(() => {
-        document.getElementById("loadingMessage").innerHTML = `
-          <div class="finalCard">
-            <img src="assets/logo.png" class="finalLogo">
-
-            <h2>👽 Felicidades</h2>
-            <p class="finalText">
-              Tu saludo fue enviado correctamente. Únete a la Comunidad exclusiva del Marciano con el link que te dejo aquí mi dey:
-            </p>
-
-            <div style="display:flex;flex-direction:column;gap:12px;margin-top:20px;">
-
-              <a class="whatsapp-btn" target="_blank"
-                href="https://chat.whatsapp.com/J6hiFg8LpgW6DkTp4BCPiU">
-                Com. Marciano Vol.2 👽
-              </a>
-
-            </div>
-
-            <p class="finalFooter">América Esports - 2026</p>
-          </div>
-        `;
-      });
-
-      // 🔥 desactivar botones (anti spam)
-      if (sendBtn) sendBtn.disabled = true;
-      const audioBtn = document.getElementById("sendAudioBtn");
-      if (audioBtn) audioBtn.setAttribute("disabled", true);
-
-      // 🔥 fetch en paralelo (NO bloquea UI)
-      fetch("https://script.google.com/macros/s/AKfycbxkJj2s-2e9ZTrBf-zYeAqFnnib9F_Jn1Sb4DhQOXKZ6BY3Upr7O_rl9r8mm3xculRIyw/exec", {
-        method: "POST",
-        headers: { "Content-Type": "text/plain;charset=utf-8" },
-        body: JSON.stringify({
-          type: "photo",
-          name: name || "Anonimo",
-          message: message || "",
-          image: imageData
-        })
-      })
-      .then(() => console.log("FETCH OK (photo)"))
-      .catch(err => console.error("FETCH ERROR (photo):", err));
-    }
-
-  const galleryInput = document.getElementById("galleryInput");
-  const galleryBtn = document.getElementById("galleryBtn");
-
-  function openGallery() {
-    galleryInput.click();
-  }
-
-  galleryInput.addEventListener("change", () => {
-    const file = galleryInput.files[0];
-    if (!file) return;
-
-    if (!file.type.startsWith("image/")) {
-      alert("Solo se permiten imágenes");
-      return;
-    }
-
-    const reader = new FileReader();
-    reader.onload = () => {
-      const base64 = reader.result.split(",")[1];
-      imageData = base64;
-
-      preview.src = reader.result;
-
-      video.style.display = "none";
-      preview.style.display = "block";
-
-      takeBtn.style.display = "none";
-      switchBtn.style.display = "none";
-      galleryBtn.style.display = "none";
-
-      retakeBtn.style.display = "block";
-      sendBtn.style.display = "block";
-      sendBtn.disabled = false; // ✅ FIX
-
-      statusText.innerText = "Imagen cargada desde tu galería 📸";
-    };
-
-    reader.readAsDataURL(file);
-  });
-
- function selectMode(mode) {
-
-  const title = document.querySelector("h1");
-  const subtitle = document.getElementById("subtitle");
-
-  // Reset pantallas siempre primero
-  document.getElementById("modeSelector").style.display = "none";
-  document.getElementById("photoContent").style.display = "none";
-  document.getElementById("audioContent").style.display = "none";
-
-  /* ================= Concurso de KIA ================= */
-  if(mode === "concurso"){
-  title.innerText = "Concurso KIA 🚗";
-  subtitle.innerText = "Sube tu captura y participa";
-
-  document.getElementById("concursoContent").style.display = "block";
-  return;
+<div class="card" id="mainCard">
+<img src="assets/logo.png" class="logo" alt="El Marciano">
+<h1>Saluda al Marciano 👽</h1>
+<p class="subtitle" id="subtitle">¡Manda tus saludos a los marcianos y al panel! 🎉</p>
+
+<div id="modeSelector">
+<br><button onclick="selectMode('photo')">📸 Envía tu foto</button>
+<!-- <button onclick="selectMode('audio')">🎙️ Envía tu audio</button> -->
+<!-- <button onclick="selectMode('concurso')">🚗 Concurso KIA</button> -->
+</div>
+
+<div id="photoContent" style="display:none">
+<input id="name" maxlength="60" placeholder="Tu nombre / de dónde nos ves">
+<textarea id="message" maxlength="180" placeholder="Tu mensaje para El Marciano"></textarea>
+<video id="video" autoplay playsinline></video>
+<img id="photoPreview" class="preview" style="display:none" alt="Vista previa">
+<canvas id="canvas" style="display:none"></canvas>
+<input type="file" id="galleryInput" accept="image/*" style="display:none">
+<button class="secondary" onclick="switchCamera()" id="switchBtn">Cambiar cámara</button>
+<button onclick="takePhoto()" id="takeBtn">Tomar foto</button>
+<button class="secondary" onclick="openGallery()" id="galleryBtn">Subir desde galería</button>
+<button onclick="retakePhoto()" id="retakeBtn" style="display:none">Hacer nueva foto</button>
+<button onclick="send()" id="sendBtn" style="display:none">Enviar saludo</button>
+<div id="status"></div>
+</div>
+
+<div id="audioContent" style="display:none">
+<input id="audioName" maxlength="60" placeholder="Tu nombre / de dónde nos ves">
+<input type="file" id="iosAudioInput" accept="audio/*" capture style="display:none">
+<button onclick="startRecording()">🎙️ Grabar audio</button>
+<button onclick="stopRecording()" disabled id="stopBtn">⏹️ Detener</button>
+<audio id="audioPreview" controls style="display:none"></audio>
+<button onclick="sendAudio()" id="sendAudioBtn" style="display:none">Enviar audio</button>
+<div id="recordingIndicator"><div class="rec-dot"></div><span>Grabando audio...</span></div>
+<div id="audioStatus"></div>
+</div>
+
+<div id="concursoContent" style="display:none">
+<h2>Participa en el sorteo KIA 🚗</h2>
+<div class="inputGroup">
+<label>Tu nombre completo</label>
+<input id="concursoNombre" maxlength="100" placeholder="Ej: Marciano Lujan Carrion">
+</div>
+<div class="inputGroup">
+<label>Número de WhatsApp</label>
+<input id="concursoCelular" maxlength="9" inputmode="numeric" placeholder="Ej: 987654321">
+<label>📌 Nota: Si eres ganador, nos comunicaremos a este número mediante WhatsApp</label>
+</div>
+<div class="uploadBox">
+<button class="secondary" onclick="abrirInputConcurso()">📤 Subir imagen</button>
+<p class="helperText">Sube una captura como esta 👇</p>
+<input type="file" id="concursoFoto" accept="image/*" style="display:none">
+<img src="assets/imgKIA.png" class="referenciaImg" alt="Imagen de referencia">
+<img id="concursoPreview" class="preview" style="display:none" alt="Vista previa">
+<button class="secondary" onclick="reemplazarImagen()" id="reuploadBtn" style="display:none">🔁 Cambiar imagen</button>
+</div>
+<button onclick="enviarConcurso()" id="concursoBtn">Enviar participación</button>
+<div id="concursoStatus"></div>
+</div>
+</div>
+
+<div id="loadingOverlay">
+<div class="loaderBox">
+<p id="loadingMessage">Procesando... 👽</p>
+<div class="loaderBar"><div id="loaderFill"></div></div>
+</div>
+</div>
+
+<script>
+const ENDPOINT="https://script.google.com/macros/s/AKfycbxkJj2s-2e9ZTrBf-zYeAqFnnib9F_Jn1Sb4DhQOXKZ6BY3Upr7O_rl9r8mm3xculRIyw/exec";
+const video=document.getElementById("video"),canvas=document.getElementById("canvas"),preview=document.getElementById("photoPreview"),statusText=document.getElementById("status"),takeBtn=document.getElementById("takeBtn"),retakeBtn=document.getElementById("retakeBtn"),sendBtn=document.getElementById("sendBtn"),switchBtn=document.getElementById("switchBtn"),sendAudioBtn=document.getElementById("sendAudioBtn"),mainCard=document.getElementById("mainCard"),galleryInput=document.getElementById("galleryInput"),galleryBtn=document.getElementById("galleryBtn"),iosAudioInput=document.getElementById("iosAudioInput"),isIOS=/iPad|iPhone|iPod/.test(navigator.userAgent);
+let imageData=null,currentFacing="user",stream=null,mediaRecorder,audioChunks=[],audioBlob=null,audioStream=null,concursoImage=null,loaderInterval;
+
+function trackEvent(name,params={}){if(typeof gtag==="function")gtag("event",name,params)}
+
+function startCamera(){
+if(stream)stream.getTracks().forEach(t=>t.stop());
+navigator.mediaDevices.getUserMedia({video:{facingMode:currentFacing,width:{ideal:1280},height:{ideal:720}}}).then(s=>{stream=s;video.srcObject=stream}).catch(()=>{statusText.innerText="No se pudo acceder a la cámara. Puedes subir una foto desde tu galería."});
 }
-  /* ================= PHOTO ================= */
-  if(mode === "photo"){
-    title.innerText = "Saluda al Marciano";
-    subtitle.innerText = "Elige cómo quieres enviar tu saludo";
-    document.getElementById("photoContent").style.display = "block";
-    startCamera();
-    return;
-  }
-
-  /* ================= AUDIO ================= */
-  if(mode === "audio"){
-    title.innerText = "Saluda al Marciano";
-    subtitle.innerText = "Elige cómo quieres enviar tu saludo";
-    document.getElementById("audioContent").style.display = "block";
-    startAudio();
-    return;
-  }
-
-  }
-
-    let mediaRecorder;
-    let audioChunks = [];
-    let audioBlob = null;
-    let audioStream = null;
 
-    function startAudio() {
-      navigator.mediaDevices.getUserMedia({ audio: true })
-        .then(s => {
-          audioStream = s;
-
-          let options = {};
-          if (MediaRecorder.isTypeSupported("audio/webm"))
-            options.mimeType = "audio/webm";
-          else if (MediaRecorder.isTypeSupported("audio/mp4"))
-            options.mimeType = "audio/mp4";
-
-          try{
-            mediaRecorder = new MediaRecorder(s, options);
-          }catch{
-            // fallback iOS
-            mediaRecorder = null;
-          }
-        });
-    }
-
-/* =========================================================================== */
-
-    const iosAudioInput = document.getElementById("iosAudioInput");
-
-    iosAudioInput.addEventListener("change", e => {
-      const file = e.target.files[0];
-      if (!file) return;
-
-      audioBlob = file;
-
-      const audioURL = URL.createObjectURL(file);
-      const audioPreview = document.getElementById("audioPreview");
-
-      audioPreview.src = audioURL;
-      audioPreview.style.display = "block";
-      sendAudioBtn.disabled = false;
-      document.getElementById("sendAudioBtn").style.display = "block";
-    });
-
-    function startRecording() {
-      if (isIOS) {
-        iosAudioInput.click();
-        return;
-      }
-
-      if (!mediaRecorder) return;
-
-      audioChunks = [];
-      mediaRecorder.start();
-
-      document.getElementById("recordingIndicator").style.display = "flex";
-      document.getElementById("stopBtn").disabled = false;
-    }
-
-
-    function stopRecording() {
-      mediaRecorder.stop();
-
-      document.getElementById("recordingIndicator").style.display = "none";
-      document.getElementById("stopBtn").disabled = true;
-
-      mediaRecorder.ondataavailable = e => {
-        audioChunks.push(e.data);
-      };
-
-      mediaRecorder.onstop = () => {
-        const mimeType = MediaRecorder.isTypeSupported("audio/webm")
-          ? "audio/webm"
-          : "audio/mp4";
-
-        audioBlob = new Blob(audioChunks, { type: mimeType });
-
-
-        const audioURL = URL.createObjectURL(audioBlob);
-        const audioPreview = document.getElementById("audioPreview");
-
-        audioPreview.src = audioURL;
-        audioPreview.style.display = "block";
-        sendAudioBtn.disabled = false;
-
-        document.getElementById("sendAudioBtn").style.display = "block";
-      };
-    }
-
-    function sendAudio() {
-      mainCard.style.display = "none";
-      loadingScreen.style.display = "flex";
-      document.getElementById("progressBar").style.width = "0%";
-      
-      loadingText.innerText = "Procesando tu envío... 👽";
-      document.getElementById("loadingActions").style.display = "none";
-
-
-      const reader = new FileReader();
-
-      reader.onload = () => {
-        const base64Audio = reader.result.split(",")[1];
-
-        sendBtn && (sendBtn.disabled = true);
-        const audioBtn = document.getElementById("sendAudioBtn");
-        if (audioBtn) audioBtn.setAttribute("disabled", true);
-
-        fetch("https://script.google.com/macros/s/AKfycbxkJj2s-2e9ZTrBf-zYeAqFnnib9F_Jn1Sb4DhQOXKZ6BY3Upr7O_rl9r8mm3xculRIyw/exec", {
-          method: "POST",
-          headers:{ "Content-Type":"text/plain;charset=utf-8" },
-          body: JSON.stringify({
-            type: "audio",
-            name: document.getElementById("audioName").value || "Anonimo",
-            audio: base64Audio
-          })
-        }).then(() => {
-            loadingText.innerHTML = `
-              Tus saludos han sido enviados mi marcianin 👽<br><br>
-              <a class="whatsapp-btn" target="_blank"
-                href="https://chat.whatsapp.com/IviDOt7pRjbCywAfzSFe6d">
-                Unirme a la comunidad 🚀
-              </a>
-            `;
-
-            document.getElementById("loadingActions").style.display = "block";
-        });
-      };
-
-      reader.readAsDataURL(audioBlob);
-    }
-
-/* =========================================================================== */
-
-/*== FUNCION de KIA CONCURSO ==*/
-let concursoImage = null;
-
-const concursoInput = document.getElementById("concursoFoto");
-const concursoPreview = document.getElementById("concursoPreview");
-
-    concursoInput.addEventListener("change", () => {
-      const file = concursoInput.files[0];
-      if (!file) return;
-
-      if (!file.type.startsWith("image/")) {
-        alert("Solo se permiten imágenes");
-        return;
-      }
-
-      const reader = new FileReader();
-      reader.onload = () => {
-        concursoImage = reader.result.split(",")[1];
-
-        concursoPreview.src = reader.result;
-        concursoPreview.style.display = "block";
-
-        document.getElementById("reuploadBtn").style.display = "block"; // 🔥
-      };
-
-      reader.readAsDataURL(file);
-    });
-
-
-    /*======= ENVIAR CONCURSO ==========*/
-    function enviarConcurso() {
-      const nombre = document.getElementById("concursoNombre").value.trim();
-      const celular = document.getElementById("concursoCelular").value.trim();
-
-      if (!nombre || !celular || !concursoImage) {
-        alert("Completa todos los campos");
-        return;
-      }
-
-      if (celular.length < 9) {
-        alert("Número inválido");
-        return;
-      }
-
-      // 🔥 ocultar UI
-      mainCard.style.display = "none";
-
-      // 🔥 iniciar loader (independiente del fetch)
-      startLoader(() => {
-        document.getElementById("loadingMessage").innerHTML = `
-          <div class="finalCard">
-            <img src="assets/logo.png" class="finalLogo">
-
-            <h2>👽 Felicidades</h2>
-            <p class="finalText">
-              Tu mensaje fue enviado correctamente
-            </p>
-
-            <a class="whatsapp-btn" target="_blank"
-              href="https://chat.whatsapp.com/IviDOt7pRjbCywAfzSFe6d">
-              Únete a la Comunidad del Marciano 🚀
-            </a>
-
-            <p class="finalFooter">América Esports - 2026</p>
-          </div>
-        `;
-      });
-
-      // 🔥 enviar en paralelo
-      fetch("https://script.google.com/macros/s/AKfycbxkJj2s-2e9ZTrBf-zYeAqFnnib9F_Jn1Sb4DhQOXKZ6BY3Upr7O_rl9r8mm3xculRIyw/exec", {
-        method: "POST",
-        headers: { "Content-Type": "text/plain;charset=utf-8" },
-        body: JSON.stringify({
-          type: "concurso",
-          nombre: nombre,
-          celular: celular,
-          imagen: concursoImage
-        })
-      })
-      .then(() => console.log("FETCH OK"))
-      .catch(err => console.error("FETCH ERROR:", err));
-    }
-
-
-    /* Funcion para REEMPLAZAR IMG DEL CONCURSO */
-
-    function reemplazarImagen() {
-      document.getElementById("concursoFoto").click();
-    }
-
-    function abrirInputConcurso() {
-      document.getElementById("concursoFoto").click();
-    }
-
-    function reemplazarImagen() {
-      document.getElementById("concursoFoto").click();
-    }
-
-/* =========================================================================== */
-
-    function resetApp() {
-      loadingScreen.style.display = "none";
-      mainCard.style.display = "block";
-      iosAudioInput.value = "";
-
-      if (stream) {
-        stream.getTracks().forEach(t => t.stop());
-        stream = null;
-      }
-
-      if (audioStream) {
-        audioStream.getTracks().forEach(t => t.stop());
-        audioStream = null;
-      }
-
-
-      document.getElementById("modeSelector").style.display = "block";
-      document.getElementById("photoContent").style.display = "none";
-      document.getElementById("audioContent").style.display = "none";
-
-      document.getElementById("photoPreview").style.display = "none";
-      document.getElementById("audioPreview").style.display = "none";
-      document.getElementById("sendAudioBtn").style.display = "none";
-
-      document.getElementById("recordingIndicator").style.display = "none";
-      document.getElementById("stopBtn").disabled = true;
-
-      imageData = null;
-      audioBlob = null;
-      sendBtn.disabled = false;
-      sendAudioBtn.disabled = false;
-      sendAudioBtn.style.display = "none";
-
-      
-      document.querySelector("h1").innerText = "Saluda al Marciano";
-
-      document.getElementById("name").value = "";
-      document.getElementById("message").value = "";
-      document.getElementById("audioName").value = "";
-
-  
-      document.getElementById("status").innerText = "";
-      window.scrollTo(0,0);
-
-      document.getElementById("subtitle").innerText =
-        "Elige cómo quieres enviar tu saludo";
-    }
-
-
-/* =========================================================================== */
-
-      /* FUNCION LOADING*/
-      let loaderInterval;
-
-      function startLoader(callback) {
-        const overlay = document.getElementById("loadingOverlay");
-        const fill = document.getElementById("loaderFill");
-        const bar = document.querySelector(".loaderBar");
-
-        overlay.style.display = "flex";
-        fill.style.width = "0%";
-
-        let progress = 0;
-
-        loaderInterval = setInterval(() => {
-          progress += 2.25;
-
-          if (progress >= 100) {
-            progress = 100;
-            fill.style.width = "100%";
-
-            clearInterval(loaderInterval);
-
-            // 🔥 ESPERA PEQUEÑA PARA EFECTO FINAL
-            setTimeout(() => {
-
-              // 🔥 OCULTA LA BARRA
-              if (bar) bar.style.display = "none";
-
-              callback();
-
-            }, 300);
-
-            return;
-          }
-
-          fill.style.width = progress + "%";
-
-        }, 100);
-      }
-    
-  </script>
-
+function switchCamera(){
+currentFacing=currentFacing==="user"?"environment":"user";
+trackEvent("camera_switch",{camera:currentFacing});
+startCamera();
+}
+
+function compressImage(source,maxSize=1600,quality=.82){
+return new Promise(resolve=>{
+const img=new Image();
+img.onload=()=>{
+let w=img.width,h=img.height;
+if(w>maxSize||h>maxSize){if(w>h){h=Math.round(h*maxSize/w);w=maxSize}else{w=Math.round(w*maxSize/h);h=maxSize}}
+const c=document.createElement("canvas");c.width=w;c.height=h;c.getContext("2d").drawImage(img,0,0,w,h);
+resolve(c.toDataURL("image/jpeg",quality).split(",")[1]);
+};
+img.src=typeof source==="string"?source:URL.createObjectURL(source);
+});
+}
+
+function takePhoto(){
+if(!video.videoWidth){alert("Espera un momento a que se active la cámara.");return}
+canvas.width=video.videoWidth;canvas.height=video.videoHeight;canvas.getContext("2d").drawImage(video,0,0);
+const raw=canvas.toDataURL("image/jpeg",.9);
+compressImage(raw).then(data=>{
+imageData=data;
+preview.src="data:image/jpeg;base64,"+data;
+video.style.display="none";preview.style.display="block";takeBtn.style.display="none";switchBtn.style.display="none";galleryBtn.style.display="none";retakeBtn.style.display="block";sendBtn.style.display="block";sendBtn.disabled=false;
+statusText.innerText="¿Te gusta la foto?";trackEvent("photo_taken");
+});
+}
+
+function retakePhoto(){
+imageData=null;preview.style.display="none";video.style.display="block";takeBtn.style.display="block";switchBtn.style.display="block";galleryBtn.style.display="block";retakeBtn.style.display="none";sendBtn.style.display="none";galleryInput.value="";statusText.innerText="";sendBtn.disabled=false;trackEvent("photo_retake");
+}
+
+function openGallery(){galleryInput.click()}
+
+galleryInput.addEventListener("change",()=>{
+const file=galleryInput.files[0];if(!file)return;
+if(!file.type.startsWith("image/")){alert("Solo se permiten imágenes");return}
+compressImage(file).then(base64=>{
+imageData=base64;preview.src="data:image/jpeg;base64,"+base64;video.style.display="none";preview.style.display="block";takeBtn.style.display="none";switchBtn.style.display="none";galleryBtn.style.display="none";retakeBtn.style.display="block";sendBtn.style.display="block";sendBtn.disabled=false;statusText.innerText="Imagen cargada desde tu galería 📸";trackEvent("photo_uploaded");
+});
+});
+
+function selectMode(mode){
+document.getElementById("modeSelector").style.display="none";document.getElementById("photoContent").style.display="none";document.getElementById("audioContent").style.display="none";document.getElementById("concursoContent").style.display="none";
+const title=document.querySelector("h1"),subtitle=document.getElementById("subtitle");
+trackEvent("mode_selected",{mode});
+if(mode==="photo"){title.innerText="Saluda al Marciano";subtitle.innerText="Elige cómo quieres enviar tu saludo";document.getElementById("photoContent").style.display="block";startCamera()}
+if(mode==="audio"){title.innerText="Saluda al Marciano";subtitle.innerText="Elige cómo quieres enviar tu saludo";document.getElementById("audioContent").style.display="block";startAudio()}
+if(mode==="concurso"){title.innerText="Concurso KIA 🚗";subtitle.innerText="Sube tu captura y participa";document.getElementById("concursoContent").style.display="block"}
+}
+
+function send(){
+const name=document.getElementById("name").value.trim(),message=document.getElementById("message").value.trim();
+if(!imageData){alert("Debes tomar o subir una foto");return}
+mainCard.style.display="none";sendBtn.disabled=true;sendBtn.innerText="Enviando...";
+trackEvent("greeting_send_start");
+startLoader(()=>{
+document.getElementById("loadingMessage").innerHTML=`<div class="finalCard"><img src="assets/logo.png" class="finalLogo" alt="El Marciano"><h2>👽 ¡Felicidades!</h2><p class="finalText">Tu saludo fue enviado correctamente. Únete a la Comunidad exclusiva del Marciano con el link que te dejo aquí mi dey:</p><div style="display:flex;flex-direction:column;gap:12px;margin-top:20px"><a class="whatsapp-btn" target="_blank" rel="noopener" href="https://chat.whatsapp.com/J6hiFg8LpgW6DkTp4BCPiU">Com. Marciano Vol.2 👽</a></div><p class="finalFooter">América Esports - 2026</p></div>`;
+trackEvent("greeting_sent");
+});
+fetch(ENDPOINT,{method:"POST",headers:{"Content-Type":"text/plain;charset=utf-8"},body:JSON.stringify({type:"photo",name:name||"Anonimo",message:message||"",image:imageData})}).then(()=>console.log("FETCH OK (photo)")).catch(err=>console.error("FETCH ERROR (photo):",err));
+}
+
+function startAudio(){
+navigator.mediaDevices.getUserMedia({audio:true}).then(s=>{
+audioStream=s;let options={};
+if(MediaRecorder.isTypeSupported("audio/webm"))options.mimeType="audio/webm";else if(MediaRecorder.isTypeSupported("audio/mp4"))options.mimeType="audio/mp4";
+try{mediaRecorder=new MediaRecorder(s,options)}catch{mediaRecorder=null}
+}).catch(()=>{document.getElementById("audioStatus").innerText="No se pudo acceder al micrófono."});
+}
+
+iosAudioInput.addEventListener("change",e=>{
+const file=e.target.files[0];if(!file)return;
+audioBlob=file;const audioPreview=document.getElementById("audioPreview");audioPreview.src=URL.createObjectURL(file);audioPreview.style.display="block";sendAudioBtn.disabled=false;sendAudioBtn.style.display="block";trackEvent("audio_selected");
+});
+
+function startRecording(){
+if(isIOS){iosAudioInput.click();return}
+if(!mediaRecorder)return;
+audioChunks=[];mediaRecorder.start();document.getElementById("recordingIndicator").style.display="flex";document.getElementById("stopBtn").disabled=false;trackEvent("audio_recording_start");
+}
+
+function stopRecording(){
+if(!mediaRecorder||mediaRecorder.state==="inactive")return;
+mediaRecorder.ondataavailable=e=>audioChunks.push(e.data);
+mediaRecorder.onstop=()=>{
+const mimeType=MediaRecorder.isTypeSupported("audio/webm")?"audio/webm":"audio/mp4";audioBlob=new Blob(audioChunks,{type:mimeType});const audioPreview=document.getElementById("audioPreview");audioPreview.src=URL.createObjectURL(audioBlob);audioPreview.style.display="block";sendAudioBtn.disabled=false;sendAudioBtn.style.display="block";trackEvent("audio_recording_complete");
+};
+mediaRecorder.stop();document.getElementById("recordingIndicator").style.display="none";document.getElementById("stopBtn").disabled=true;
+}
+
+function sendAudio(){
+if(!audioBlob){alert("Primero debes grabar un audio.");return}
+mainCard.style.display="none";sendAudioBtn.disabled=true;startLoader(()=>{
+document.getElementById("loadingMessage").innerHTML=`<div class="finalCard"><img src="assets/logo.png" class="finalLogo" alt="El Marciano"><h2>👽 ¡Enviado!</h2><p class="finalText">Tus saludos han sido enviados mi marcianin 👽</p><a class="whatsapp-btn" target="_blank" rel="noopener" href="https://chat.whatsapp.com/IviDOt7pRjbCywAfzSFe6d">Unirme a la comunidad 🚀</a><p class="finalFooter">América Esports - 2026</p></div>`;trackEvent("audio_sent");
+});
+const reader=new FileReader();
+reader.onload=()=>{
+const base64Audio=reader.result.split(",")[1];
+fetch(ENDPOINT,{method:"POST",headers:{"Content-Type":"text/plain;charset=utf-8"},body:JSON.stringify({type:"audio",name:document.getElementById("audioName").value.trim()||"Anonimo",audio:base64Audio})}).catch(err=>console.error("FETCH ERROR (audio):",err));
+};
+reader.readAsDataURL(audioBlob);
+}
+
+const concursoInput=document.getElementById("concursoFoto"),concursoPreview=document.getElementById("concursoPreview");
+
+concursoInput.addEventListener("change",()=>{
+const file=concursoInput.files[0];if(!file)return;
+if(!file.type.startsWith("image/")){alert("Solo se permiten imágenes");return}
+compressImage(file).then(base64=>{
+concursoImage=base64;concursoPreview.src="data:image/jpeg;base64,"+base64;concursoPreview.style.display="block";document.getElementById("reuploadBtn").style.display="block";trackEvent("kia_image_uploaded");
+});
+});
+
+function enviarConcurso(){
+const nombre=document.getElementById("concursoNombre").value.trim(),celular=document.getElementById("concursoCelular").value.trim();
+if(!nombre||!celular||!concursoImage){alert("Completa todos los campos");return}
+if(!/^\d{9}$/.test(celular)){alert("Número inválido. Debe tener 9 dígitos.");return}
+mainCard.style.display="none";document.getElementById("concursoBtn").disabled=true;trackEvent("kia_submission_start");
+startLoader(()=>{
+document.getElementById("loadingMessage").innerHTML=`<div class="finalCard"><img src="assets/logo.png" class="finalLogo" alt="El Marciano"><h2>👽 ¡Felicidades!</h2><p class="finalText">Tu participación fue enviada correctamente.</p><a class="whatsapp-btn" target="_blank" rel="noopener" href="https://chat.whatsapp.com/IviDOt7pRjbCywAfzSFe6d">Únete a la Comunidad del Marciano 🚀</a><p class="finalFooter">América Esports - 2026</p></div>`;trackEvent("kia_submission_sent");
+});
+fetch(ENDPOINT,{method:"POST",headers:{"Content-Type":"text/plain;charset=utf-8"},body:JSON.stringify({type:"concurso",nombre: nombre,celular:celular,imagen:concursoImage})}).then(()=>console.log("FETCH OK (KIA)")).catch(err=>console.error("FETCH ERROR (KIA):",err));
+}
+
+function abrirInputConcurso(){concursoInput.click()}
+function reemplazarImagen(){concursoInput.click()}
+
+function resetApp(){
+document.getElementById("loadingOverlay").style.display="none";mainCard.style.display="block";iosAudioInput.value="";
+if(stream){stream.getTracks().forEach(t=>t.stop());stream=null}
+if(audioStream){audioStream.getTracks().forEach(t=>t.stop());audioStream=null}
+document.getElementById("modeSelector").style.display="block";document.getElementById("photoContent").style.display="none";document.getElementById("audioContent").style.display="none";document.getElementById("concursoContent").style.display="none";document.getElementById("photoPreview").style.display="none";document.getElementById("audioPreview").style.display="none";document.getElementById("sendAudioBtn").style.display="none";document.getElementById("recordingIndicator").style.display="none";document.getElementById("stopBtn").disabled=true;
+imageData=null;audioBlob=null;concursoImage=null;sendBtn.disabled=false;sendBtn.style.display="none";sendBtn.innerText="Enviar saludo";sendAudioBtn.disabled=false;document.getElementById("concursoBtn").disabled=false;document.getElementById("concursoPreview").style.display="none";document.getElementById("reuploadBtn").style.display="none";galleryInput.value="";concursoInput.value="";
+document.querySelector("h1").innerText="Saluda al Marciano";document.getElementById("subtitle").innerText="¡Manda tus saludos a los marcianos y al panel! 🎉";document.getElementById("name").value="";document.getElementById("message").value="";document.getElementById("audioName").value="";document.getElementById("status").innerText="";window.scrollTo(0,0);
+}
+
+function startLoader(callback){
+const overlay=document.getElementById("loadingOverlay"),fill=document.getElementById("loaderFill"),bar=document.querySelector(".loaderBar");
+overlay.style.display="flex";fill.style.width="0%";bar.style.display="block";document.getElementById("loadingMessage").innerText="Procesando... 👽";
+let progress=0;clearInterval(loaderInterval);
+loaderInterval=setInterval(()=>{
+progress+=2.25;
+if(progress>=100){progress=100;fill.style.width="100%";clearInterval(loaderInterval);setTimeout(()=>{bar.style.display="none";callback()},300);return}
+fill.style.width=progress+"%";
+},100);
+}
+</script>
 </body>
 </html>
