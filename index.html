@@ -207,7 +207,7 @@ button:disabled{background:#555;box-shadow:none;cursor:not-allowed}
 <!-- PANTALLA INICIAL -->
 <div id="welcomeContent">
   <div class="communityLinks">
-    <a
+    <!-- <a
       href="https://chat.whatsapp.com/IviDOt7pRjbCywAfzSFe6d"
       target="_blank"
       rel="noopener"
@@ -217,6 +217,13 @@ button:disabled{background:#555;box-shadow:none;cursor:not-allowed}
       <span>
         <strong>Comunidad 1</strong>
         <small>WhatsApp</small>
+      </span>
+    </a> -->
+    <a href="https://t.me/+YmwLVFx_eS1kNmIx" target="_blank" rel="noopener" class="communityBtn telegram" onclick="trackEvent('community_click',{community:'telegram'})">
+      <span class="communityIcon">✈️</span>
+      <span>
+        <strong>Telegram</strong>
+        <small>Únete al canal</small>
       </span>
     </a>
     <a
@@ -232,19 +239,7 @@ button:disabled{background:#555;box-shadow:none;cursor:not-allowed}
         <small>WhatsApp</small>
       </span>
     </a>
-    <a
-      href="https://t.me/+YmwLVFx_eS1kNmIx"
-      target="_blank"
-      rel="noopener"
-      class="communityBtn telegram"
-      onclick="trackEvent('community_click',{community:'telegram'})"
-    >
-      <span class="communityIcon">✈️</span>
-      <span>
-        <strong>Telegram</strong>
-        <small>Únete al canal</small>
-      </span>
-    </a>
+    
   </div>
   <div class="welcomeDivider">
     <span></span>
